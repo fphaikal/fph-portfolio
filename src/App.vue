@@ -1,5 +1,6 @@
 <script setup>
 import NavBarLayout from "./layouts/NavBarLayout.vue";
+import { Icon } from '@iconify/vue';
 </script>
 
 <template>
@@ -12,11 +13,22 @@ import NavBarLayout from "./layouts/NavBarLayout.vue";
             Hello👋, I'm
             <span class="block pt-1 font-bold text-4xl lg:text-5xl text-dark">Fahreza Pasha Haikal</span>
           </h1>
-          <p class="text-slate-500 font-medium pt-1 pb-5 lg:pb-0 lg:pt-2 leading-relaxed">
+          <p class="text-slate-500 font-medium pt-1 pb-2 lg:pb-5 lg:pt-2 leading-relaxed">
             Seorang anak SMK yang sedang mencari jalan menuju masa depan.
           </p>
+
+          <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/Tailwind_CSS_Logo.svg"
+            class="relative inline-block h-10 w-10 me-5 grayscale hover:grayscale-0" alt="Tailwind CSS">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Bootstrap_logo.svg"
+            class="relative inline-block h-auto w-10 me-5 grayscale hover:grayscale-0" alt="Bootstrap">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/f/f1/Vitejs-logo.svg"
+            class="relative inline-block h-10 w-10 me-5 grayscale hover:grayscale-0" alt="Vite">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/61/HTML5_logo_and_wordmark.svg"
+            class="relative inline-block h-10 w-10 me-5 grayscale hover:grayscale-0" alt="">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/CSS3_logo_and_wordmark.svg"
+            class="relative inline-block h-10 w-10 grayscale hover:grayscale-0" alt="">
         </div>
-        <div class="w-full self-end px-4 lg:w-1/2">
+        <div class="w-full self-end pt-4 lg:pt-0 px-4 lg:w-1/2">
           <img src="./assets/fph.png" class="object-cover object-center h-auto w-56 md:w-96  mx-auto" alt="" />
         </div>
       </div>
@@ -54,7 +66,7 @@ import NavBarLayout from "./layouts/NavBarLayout.vue";
       </div>
     </div>
   </section>
-  <section id="certifications" class="pt-28 pb-28">
+  <section id="certifications" class="pt-28 pb-28 bg-gray-50  ">
     <div class="container mx-auto">
       <div class="grid gap-3 md:gap-3 grid-cols-1 lg:grid-cols-3 px-4">
         <div>
@@ -72,9 +84,11 @@ import NavBarLayout from "./layouts/NavBarLayout.vue";
                   class="relative inline-block h-[58px] w-[58px] !rounded-full object-cover object-center" />
                 <div class="flex w-full flex-col gap-0.5">
                   <div class="flex items-center justify-between">
-                    <h5 class="block text-xl antialiased font-semibold leading-snug tracking-normal text-dark">
-                      SMK SMTI Yogyakarta
-                    </h5>
+                    <a href="https://www.smtijogja.sch.id/" target="_blank">
+                      <h5 class="block text-xl antialiased font-semibold leading-snug tracking-normal text-dark">
+                        SMK SMTI Yogyakarta
+                      </h5>
+                    </a>
                   </div>
                   <p class="block text-base antialiased font-light leading-relaxed text-blue-gray-900">
                     Teknik Mekatronika | Juli 2022 - Sekarang
@@ -123,10 +137,12 @@ import NavBarLayout from "./layouts/NavBarLayout.vue";
                 class="relative inline-block h-[58px] w-[58px] !rounded-full object-cover object-center" />
               <div class="flex w-full flex-col gap-0.5">
                 <div class="flex items-center justify-between">
-                  <h5 class="block text-xl antialiased font-semibold leading-snug tracking-normal text-dark">
-                    EF SET English Certificate 39/100 <br>
-                    (A2 Elementary)
-                  </h5>
+                  <a href="https://www.efset.org/cert/opbECM" target="_blank">
+                    <h5 class="block text-xl antialiased font-semibold leading-snug tracking-normal text-dark">
+                      EF SET English Certificate 39/100 <br>
+                      (A2 Elementary)
+                    </h5>
+                  </a>
                 </div>
                 <p class="block text-base antialiased font-light leading-relaxed text-blue-gray-900">
                   EF English First Indonesia
@@ -145,9 +161,11 @@ import NavBarLayout from "./layouts/NavBarLayout.vue";
                 class="relative inline-block h-[58px] w-[58px] !rounded-full object-cover object-center" />
               <div class="flex w-full flex-col gap-0.5">
                 <div class="flex items-center justify-between">
-                  <h5 class="block text-xl antialiased font-semibold leading-snug tracking-normal text-dark">
-                    16Personalities.com: Mediator <br>(INFP-T)
-                  </h5>
+                  <a href="https://www.16personalities.com/profiles/b2b6c5b51f12f" target="_blank">
+                    <h5 class="block text-xl antialiased font-semibold leading-snug tracking-normal text-dark">
+                      16Personalities.com: Mediator <br>(INFP-T)
+                    </h5>
+                  </a>
                 </div>
                 <p class="block text-base antialiased font-light leading-relaxed text-blue-gray-900">
                   NERIS Analytics Limited
@@ -200,10 +218,103 @@ import NavBarLayout from "./layouts/NavBarLayout.vue";
       </div>
     </div>
   </section>
+  <section class="pb-28 pt-28 bg-primary">
+    <div class="container mx-auto">
+      <h1 class="block text-dark text-3xl font-bold text-center">Projects</h1>
+      <div class="flex flex-wrap justify-center">
+        <div class="flex-col pt-10 gap-4 justify-center md:flex md:flex-row">
+          <div class="card w-96 bg-dark text-white ">
+            <div class="card-body">
+              <h2 class="card-title mx-auto text-2xl pb-3">GASKAN</h2>
+              <p>GASKAN adalah Gerbang Akses Pintar dan Kehadiran yang menggunakan teknologi IoT yang di integrasikan dengan
+                sistem RFID sebagai akses masuk siswa. Sistem ini dapat mengatur akses pintu dan monitoring kehadiran siswa
+                - siswa SMK SMTI Yogyakarta melalui website.</p>
+              <div class="card-actions justify-center pt-5">
+                <div class="">
+                  <a href="https://smart-gate-system.vercel.app/" target="_blank">
+                    <Icon icon="lets-icons:out" width="25" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card w-96 bg-dark text-white mt-3 md:mt-0">
+            <div class="card-body">
+              <h2 class="card-title mx-auto text-2xl pb-3">Aqualifier</h2>
+              <p>Aqualifier System adalah sebuah sistem yang berfungsi sebagai kontrol taman, meliputi penyiraman,
+                pencahayaan, monitoring suhu dan ph. Sistem ini menggunakan teknologi IoT yang mengambil sumber listrik dari
+                panel surya. sistem ini dapat dimonitoring serta dikontrol melalui website.</p>
+              <div class="card-actions justify-center pt-5">
+                <div class="flex gap-3">
+                  <a href="https://github.com/fphaikal/aqualifier" target="_blank">
+                    <Icon icon="ri:github-fill" width="25" />
+                  </a>
+                  <a href="https://www.aqualifier.my.id/" target="_blank">
+                    <Icon icon="lets-icons:out" width="25" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card w-96 bg-dark text-white  mt-3 md:mt-0">
+            <div class="card-body">
+              <h2 class="card-title mx-auto text-2xl pb-3">Chemicfest #8 Website</h2>
+              <p>Chemicfest#8 adalah sebuah event konser yang diadakan oleh SMK SMTI Yogyakarta. Website ini dibuat untuk
+                mempromosikan event tersebut serta digunakan untuk melakukan pembayaran tiket. Website ini juga dilengkapi
+                dengan livestreaming untuk menonton konser secara online.</p>
+              <div class="card-actions justify-center pt-5">
+                <div class="flex gap-3">
+                  <a href="https://github.com/fphaikal/chemicfest-8" target="_blank">
+                    <Icon icon="ri:github-fill" width="25" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex-col md:flex pt-3 gap-4 justify-center md:flex-row">
+          <div class="card w-96 bg-dark text-white">
+            <div class="card-body">
+              <h2 class="card-title mx-auto text-2xl pb-3">Instagram Downloader</h2>
+              <p>Instagram Downloader adalah sebuah website yang dapat mendownload foto dan video dari instagram. Website
+                ini digunakan untuk para user yang ingin mendownload postingan, reels, dll menggunakan link dari instagram.
+              </p>
+              <div class="card-actions justify-center pt-5">
+                <div class="flex gap-3">
+                  <a href="https://github.com/fphaikal/web-ig-downloader" target="_blank">
+                    <Icon icon="ri:github-fill" width="25" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card w-96 bg-dark text-white  mt-3 md:mt-0">
+            <div class="card-body">
+              <h2 class="card-title mx-auto text-2xl pb-3">VuePH</h2>
+              <p>VuePH adalah website yang digunakan untuk menyaksikan live member JKT48 dan melihat history live yang
+                sudah lewat. Website ini juga dilengkapi dengan fitur chat yang dapat digunakan untuk berinteraksi dengan
+                member JKT48.
+              </p>
+              <div class="card-actions justify-center pt-5">
+                <div class="flex gap-3">
+                  <a href="https://github.com/fphaikal/VuePH" target="_blank">
+                    <Icon icon="ri:github-fill" width="25" />
+                  </a>
+                  <a href="https://www.vueph.fphaikal.my.id/" target="_blank">
+                    <Icon icon="lets-icons:out" width="25" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script>
 export default {
   name: "App",
-};
+}
 </script>
