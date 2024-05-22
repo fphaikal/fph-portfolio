@@ -103,10 +103,8 @@ import { Icon } from '@iconify/vue';
             </h1>
             <div
               class="relative flex w-full max-w-[26rem] flex-col rounded-xl bg-transparent bg-clip-border text-gray-700 shadow-none">
-              <div
-                class="relative flex items-center gap-4 pt-0 pb-0 mx-0 mt-4 overflow-hidden text-gray-700 bg-transparent shadow-none rounded-xl bg-clip-border">
-                <img
-                  src="https://api.elearning.smtijogja.sch.id/api/v1/user-file/stream?file_uri=1859/other_information/ec98dacd-a086-4311-b383-0565d8c9c333.png"
+              <div class="relative flex items-center gap-4 pt-0 pb-0 mx-0 mt-4 overflow-hidden text-gray-700 bg-transparent shadow-none rounded-xl bg-clip-border">
+                <img src="https://api.elearning.smtijogja.sch.id/api/v1/user-file/stream?file_uri=1859/other_information/ec98dacd-a086-4311-b383-0565d8c9c333.png"
                   alt="SMK SMTI Yogyakarta"
                   class="relative inline-block h-[58px] w-[58px] !rounded-full object-cover object-center" />
                 <div class="flex w-full flex-col gap-0.5">
@@ -120,6 +118,21 @@ import { Icon } from '@iconify/vue';
                   </p>
                 </div>
               </div>
+              <div class="relative flex items-center gap-4 pt-0 pb-0 mx-0 mt-4 overflow-hidden text-gray-700 bg-transparent shadow-none rounded-xl bg-clip-border">
+                <img src="https://api.elearning.smtijogja.sch.id/api/v1/user-file/stream?file_uri=1859/other_information/ec98dacd-a086-4311-b383-0565d8c9c333.png"
+                  alt="SMK SMTI Yogyakarta"
+                  class="relative inline-block h-[58px] w-[58px] !rounded-full object-cover object-center" />
+                <div class="flex w-full flex-col gap-0.5">
+                  <div class="flex items-center justify-between">
+                    <h5 class="block text-xl antialiased font-semibold leading-snug tracking-normal text-dark">
+                      Dekorasi dan Dokumentasi Chemicfest #8
+                    </h5>
+                  </div>
+                  <p class="block text-base antialiased font-light leading-relaxed text-blue-gray-900">
+                    Web Developer | Maaret 2024 - Mei 2024
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -127,12 +140,9 @@ import { Icon } from '@iconify/vue';
           <h1 class="text-3xl font-bold text-center text-primary">
             Sertifikat
           </h1>
-          <div
-            class="relative flex w-full max-w-[26rem] flex-col rounded-xl bg-transparent bg-clip-border text-gray-700 shadow-none">
-            <div
-              class="relative flex items-center gap-4 pt-0 mx-0 mt-4 overflow-hidden text-gray-700 bg-transparent shadow-none rounded-xl bg-clip-border">
-              <img
-                src="https://media.licdn.com/dms/image/C560BAQEvdugq213Fgw/company-logo_100_100/0/1630597820216/ef_english_first_indonesia_logo?e=1714003200&v=beta&t=Q9mh23pXsBfZKETcWjtoBZO-aQKiZfLj6OCs5UfSGjA"
+          <div class="relative flex w-full max-w-[26rem] flex-col rounded-xl bg-transparent bg-clip-border text-gray-700 shadow-none">
+            <div class="relative flex items-center gap-4 pt-0 mx-0 mt-4 overflow-hidden text-gray-700 bg-transparent shadow-none rounded-xl bg-clip-border">
+              <img src="https://media.licdn.com/dms/image/C560BAQEvdugq213Fgw/company-logo_100_100/0/1630597820216/ef_english_first_indonesia_logo?e=1724284800&v=beta&t=p7VR5tR-4tcFqS497Fd_9gcZTgsptcdtt534YoLwE0s"
                 alt="SMK SMTI Yogyakarta"
                 class="relative inline-block h-[58px] w-[58px] !rounded-full object-cover object-center" />
               <div class="flex w-full flex-col gap-0.5">
@@ -151,12 +161,9 @@ import { Icon } from '@iconify/vue';
               </div>
             </div>
           </div>
-          <div
-            class="relative flex w-full max-w-[26rem] flex-col rounded-xl bg-transparent bg-clip-border text-gray-700 shadow-none">
-            <div
-              class="relative flex items-center gap-4 pt-0 mx-0 mt-4 overflow-hidden text-gray-700 bg-transparent shadow-none rounded-xl bg-clip-border">
-              <img
-                src="https://media.licdn.com/dms/image/D4D0BAQH1RYcj6YS4bw/company-logo_100_100/0/1697016830838/neris_analytics_limited_logo?e=1714003200&v=beta&t=EbRSez-ANjbhfRDgXq4ENJWjmbvh39cy5_mTFr2XURg"
+          <div class="relative flex w-full max-w-[26rem] flex-col rounded-xl bg-transparent bg-clip-border text-gray-700 shadow-none">
+            <div class="relative flex items-center gap-4 pt-0 mx-0 mt-4 overflow-hidden text-gray-700 bg-transparent shadow-none rounded-xl bg-clip-border">
+              <img src="https://media.licdn.com/dms/image/D4D0BAQH1RYcj6YS4bw/company-logo_100_100/0/1697016830838/neris_analytics_limited_logo?e=1724284800&v=beta&t=NBEAz-_jU8SjNsCnoYI44eelcma6X4CoKooIjaCWnFo"
                 alt="SMK SMTI Yogyakarta"
                 class="relative inline-block h-[58px] w-[58px] !rounded-full object-cover object-center" />
               <div class="flex w-full flex-col gap-0.5">
@@ -170,6 +177,26 @@ import { Icon } from '@iconify/vue';
                 <p class="block text-base antialiased font-light leading-relaxed text-blue-gray-900">
                   NERIS Analytics Limited
                   Issued Sep 2022
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="relative flex w-full max-w-[26rem] flex-col rounded-xl bg-transparent bg-clip-border text-gray-700 shadow-none">
+            <div class="relative flex items-center gap-4 pt-0 mx-0 mt-4 overflow-hidden text-gray-700 bg-transparent shadow-none rounded-xl bg-clip-border">
+              <img src="https://media.licdn.com/dms/image/D4D0BAQHk6wxdrenCpg/company-logo_100_100/0/1698875993396/smalltalk2me_logo?e=1724284800&v=beta&t=DB-Y0qSONIYgqhsWZatVLPKMZGASQ7HQac0nBTDss_Y"
+                alt="SMK SMTI Yogyakarta"
+                class="relative inline-block h-[58px] w-[58px] !rounded-full object-cover object-center" />
+              <div class="flex w-full flex-col gap-0.5">
+                <div class="flex items-center justify-between">
+                  <a href="https://app.smalltalk2.me/cert/5cc09ce4" target="_blank">
+                    <h5 class="block text-xl antialiased font-semibold leading-snug tracking-normal text-dark">
+                      SmallTalk English Speaking Level Test
+                    </h5>
+                  </a>
+                </div>
+                <p class="block text-base antialiased font-light leading-relaxed text-blue-gray-900">
+                  SmallTalk2Me
+                  Issued Mei 2024
                 </p>
               </div>
             </div>
@@ -218,12 +245,29 @@ import { Icon } from '@iconify/vue';
       </div>
     </div>
   </section>
-  <section class="pb-28 pt-28 bg-primary">
+  <section id="projects" class="pb-28 pt-28 bg-primary">
     <div class="container mx-auto">
       <h1 class="block text-dark text-3xl font-bold text-center">Projects</h1>
       <div class="flex flex-wrap justify-center">
         <div class="flex-col pt-10 gap-4 justify-center md:flex md:flex-row">
           <div class="card w-96 bg-dark text-white ">
+            <div class="card-body">
+              <h2 class="card-title mx-auto text-2xl pb-3">NatsLock</h2>
+              <p>Natslock adalah Next Generation and Smart Lifestyle Locker yang menggunakan teknologi IoT yang di integrasikan dengan
+                sisten rental sebagai tempat penyimpanan yang aman. Proyek ini dibuat untuk memenuhi nilai P5(Proyek Penguatan Profil Pelajar Pancasila)</p>
+              <div class="card-actions justify-center pt-5">
+                <div class="flex gap-3">
+                  <a href="https://github.com/fphaikal/natslock" target="_blank">
+                    <Icon icon="ri:github-fill" width="25" />
+                  </a>
+                  <a href="https://natslock.site" target="_bplank">
+                    <Icon icon="lets-icons:out" width="25" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card w-96 bg-dark text-white mt-3 md:mt-0">
             <div class="card-body">
               <h2 class="card-title mx-auto text-2xl pb-3">GASKAN</h2>
               <p>GASKAN adalah Gerbang Akses Pintar dan Kehadiran yang menggunakan teknologi IoT yang di integrasikan dengan
@@ -238,6 +282,24 @@ import { Icon } from '@iconify/vue';
               </div>
             </div>
           </div>
+          
+          <div class="card w-96 bg-dark text-white  mt-3 md:mt-0">
+            <div class="card-body">
+              <h2 class="card-title mx-auto text-2xl pb-3">Chemicfest #8 Website</h2>
+              <p>Chemicfest#8 adalah sebuah event konser yang diadakan oleh SMK SMTI Yogyakarta. Website ini dibuat untuk
+                mempromosikan event tersebut serta digunakan untuk melakukan pembayaran tiket. Website ini juga dilengkapi
+                dengan livestreaming untuk menonton konser secara online.</p>
+              <div class="card-actions justify-center pt-5">
+                <div class="flex gap-3">
+                  <a href="https://github.com/fphaikal/chemicfest-8" target="_blank">
+                    <Icon icon="ri:github-fill" width="25" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex-col md:flex pt-3 gap-4 justify-center md:flex-row">
           <div class="card w-96 bg-dark text-white mt-3 md:mt-0">
             <div class="card-body">
               <h2 class="card-title mx-auto text-2xl pb-3">Aqualifier</h2>
@@ -256,23 +318,6 @@ import { Icon } from '@iconify/vue';
               </div>
             </div>
           </div>
-          <div class="card w-96 bg-dark text-white  mt-3 md:mt-0">
-            <div class="card-body">
-              <h2 class="card-title mx-auto text-2xl pb-3">Chemicfest #8 Website</h2>
-              <p>Chemicfest#8 adalah sebuah event konser yang diadakan oleh SMK SMTI Yogyakarta. Website ini dibuat untuk
-                mempromosikan event tersebut serta digunakan untuk melakukan pembayaran tiket. Website ini juga dilengkapi
-                dengan livestreaming untuk menonton konser secara online.</p>
-              <div class="card-actions justify-center pt-5">
-                <div class="flex gap-3">
-                  <a href="https://github.com/fphaikal/chemicfest-8" target="_blank">
-                    <Icon icon="ri:github-fill" width="25" />
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="flex-col md:flex pt-3 gap-4 justify-center md:flex-row">
           <div class="card w-96 bg-dark text-white">
             <div class="card-body">
               <h2 class="card-title mx-auto text-2xl pb-3">Instagram Downloader</h2>

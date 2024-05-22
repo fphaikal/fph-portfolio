@@ -20,16 +20,19 @@
       <ul :class="showMenu ? 'flex' : 'hidden'"
         class="flex-col mt-8 space-y-4 md:flex md:space-y-0 md:flex-row md:items-center md:space-x-10 md:mt-0">
         <li class="text-sm font-bold text-gray-800 hover:text-blue-400">
-          Home
+          <a href="#home">
+            Home
+          </a>
         </li>
         <li class="text-sm font-bold text-gray-800 hover:text-blue-400">
-          About
+          <a href="#about">
+            About
+          </a>
         </li>
         <li class="text-sm font-bold text-gray-800 hover:text-blue-400">
-          Blogs
-        </li>
-        <li class="text-sm font-bold text-gray-800 hover:text-blue-400">
-          Contact Us
+          <a href="#projects">
+            Projects
+          </a>
         </li>
       </ul>
     </nav>
