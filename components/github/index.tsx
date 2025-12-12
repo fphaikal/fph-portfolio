@@ -1,8 +1,7 @@
 'use client'
 
-import { Card, Image } from "@nextui-org/react";
-import { button as buttonStyles } from "@nextui-org/theme";
-import { Link } from "@nextui-org/link"
+import { Card, Image, Link } from "@heroui/react";
+import { button as buttonStyles } from "@heroui/theme";
 
 
 export default function GithubStats() {

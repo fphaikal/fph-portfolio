@@ -2,57 +2,121 @@
 @tailwind components;
 @tailwind utilities;
 
-.gradient {
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #fff 20%,
-    #fff 80%,
-    transparent
-  );
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #fff 20%,
-    #fff 80%,
-    transparent
-  );
+html {
+  background-color: black;
 }
 
-.embla {
-  overflow: hidden;
-  --slide-spacing: 1rem;
-}
-.embla__container {
-  display: flex;
-}
-.embla__slide__icon {
-  flex: 0 0 10%;
-  min-width: 0;
-}
-.embla__slide {
-  flex: 0 0 50%;
-  min-width: 0;
+/* Override for light mode */
+html.light {
+  background-color: white;
 }
 
-.embla__project {
-  max-width: 48rem;
-  margin: auto;
-  --slide-height: 19rem;
-  --slide-spacing: 1rem;
-  --slide-size: 70%;
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --radius: 0.75rem;
+  }
 }
-.embla__viewport__project {
-  overflow: hidden;
+
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
-.embla__container__project {
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500;
+}
+
+/* Spotify Gradient */
+.text-spotify-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-500;
+}
+
+/* Music Wave Animation */
+@keyframes music-wave {
+
+  0%,
+  100% {
+    height: 4px;
+  }
+
+  50% {
+    height: 16px;
+  }
+}
+
+.music-wave {
   display: flex;
-  touch-action: pan-y pinch-zoom;
-  margin-left: calc(var(--slide-spacing) * -1);
+  align-items: flex-end;
+  gap: 2px;
+  height: 20px;
 }
-.embla__slide__project {
-  transform: translate3d(0, 0, 0);
-  flex: 0 0 var(--slide-size);
-  min-width: 0;
-  padding-left: var(--slide-spacing);
+
+.music-wave span {
+  width: 3px;
+  background: linear-gradient(to top, #22c55e, #4ade80);
+  border-radius: 2px;
+  animation: music-wave 0.8s ease-in-out infinite;
+}
+
+.music-wave span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.music-wave span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.music-wave span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.music-wave span:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.music-wave span:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+/* Spotify Glow */
+.spotify-glow {
+  box-shadow: 0 0 30px rgba(34, 197, 94, 0.3), 0 0 60px rgba(34, 197, 94, 0.1);
+}
+
+/* Hover Glow Effect */
+.hover-glow {
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 40px rgba(34, 197, 94, 0.4), 0 0 80px rgba(34, 197, 94, 0.2);
+}
+
+/* Track Rank Gradient */
+.rank-gradient {
+  background: linear-gradient(135deg, #22c55e 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

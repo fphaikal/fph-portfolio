@@ -12,9 +12,10 @@ interface Track {
   album: string;
   albumImageUrl: string;
   url: string;
+  playedAt?: string;
 }
 
-export default function SpotifyTopTracks() {
+export default function SpotifyRecentlyPlayed() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
@@ -22,12 +23,12 @@ export default function SpotifyTopTracks() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/top-tracks`);
+        const response = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/recently-played?limit=9`);
         if (!response.ok) {
           throw new Error('Failed to fetch');
         }
         const data = await response.json();
-        setTracks(data.data);
+        setTracks(data.data || []);
         setLoading(false);
       } catch (err) {
         setError(true);
@@ -37,6 +38,20 @@ export default function SpotifyTopTracks() {
 
     fetchData();
   }, []);
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  };
 
   if (loading) {
     return (
@@ -53,7 +68,18 @@ export default function SpotifyTopTracks() {
       <GlassCard intensity="medium" className="p-6">
         <div className="flex items-center justify-center gap-3">
           <RiSpotifyFill size={24} className="text-red-500" />
-          <p className="text-red-500">Failed to load tracks</p>
+          <p className="text-red-500">Failed to load recently played</p>
+        </div>
+      </GlassCard>
+    );
+  }
+
+  if (!tracks || tracks.length === 0) {
+    return (
+      <GlassCard intensity="medium" className="p-6">
+        <div className="flex items-center justify-center gap-3">
+          <RiSpotifyFill size={24} className="text-foreground/40" />
+          <p className="text-foreground/60">No recently played tracks</p>
         </div>
       </GlassCard>
     );
@@ -63,7 +89,7 @@ export default function SpotifyTopTracks() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {tracks.map((track, index) => (
         <motion.a
-          key={index}
+          key={`${track.name}-${index}`}
           href={track.url}
           target="_blank"
           rel="noopener noreferrer"
@@ -78,13 +104,6 @@ export default function SpotifyTopTracks() {
             className="p-4 h-full transition-all duration-300 group-hover:bg-white/10 dark:group-hover:bg-white/10"
           >
             <div className="flex items-center gap-4">
-              {/* Rank Number */}
-              <div className="shrink-0 w-8 text-center">
-                <span className={`text-2xl font-bold ${index < 3 ? 'rank-gradient' : 'text-foreground/30'}`}>
-                  {index + 1}
-                </span>
-              </div>
-
               {/* Album Art */}
               <div className="relative shrink-0 overflow-hidden rounded-lg">
                 <img
@@ -106,9 +125,11 @@ export default function SpotifyTopTracks() {
                 <p className="text-sm text-foreground/60 truncate">
                   {track.artists}
                 </p>
-                <p className="text-xs text-foreground/40 truncate">
-                  {track.album}
-                </p>
+                {track.playedAt && (
+                  <p className="text-xs text-foreground/40">
+                    {formatTimeAgo(track.playedAt)}
+                  </p>
+                )}
               </div>
 
               {/* Spotify Icon */}

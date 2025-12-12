@@ -1,13 +1,14 @@
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
-import { Link } from "@nextui-org/link";
+import Link from "next/link";
 import clsx from "clsx";
 
 import { Providers } from "./providers";
 
 import { siteConfig } from "@/config/site";
-import { ibrand } from "@/config/fonts";
+import { ibrand, fontSans } from "@/config/fonts";
 import { Sidebar } from "@/components/sidebar";
+import FluidBackground from "@/components/ui/fluid-background";
 
 export const metadata: Metadata = {
   title: {
@@ -40,19 +41,20 @@ export default function RootLayout({
     <html suppressHydrationWarning lang="en">
       <body
         className={clsx(
-          "min-h-screen bg-background font-sans antialiased",
+          "min-h-screen font-sans antialiased",
           ibrand.variable,
+          fontSans.variable,
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          <div className="flex w-full h-screen overflow-hidden">
+          <FluidBackground />
+          <div className="flex w-full min-h-screen">
             <Sidebar />
-            <main className="flex-1 overflow-y-auto">
+            <main className="flex-1">
               <div className="container mx-auto max-w-7xl pt-16 px-6">
                 {children}
                 <footer className="w-full flex items-center justify-center py-3">
                   <Link
-                    isExternal
                     className="flex items-center gap-1 text-current"
                     href="/"
                     title="Home"

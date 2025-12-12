@@ -1,8 +1,6 @@
 'use client'
 
 import {
-  Card,
-  CardFooter,
   Image,
   Button,
   Modal,
@@ -12,15 +10,16 @@ import {
   ModalFooter,
   useDisclosure,
   Divider,
-} from "@nextui-org/react";
-import { button as buttonStyles } from "@nextui-org/theme";
+} from "@heroui/react";
+import GlassCard from "@/components/ui/glass-card";
+import { button as buttonStyles } from "@heroui/theme";
 import { useState } from "react";
 
 interface Certificate {
   name: string;
   company: string;
   year: string;
-  image: string; // Menambahkan properti `image`
+  image: string;
 }
 
 export default function Certificate({ certificate }: { certificate: Certificate[] }) {
@@ -34,38 +33,30 @@ export default function Certificate({ certificate }: { certificate: Certificate[
 
   return (
     <div className="flex flex-col gap-4">
-      <div
-        className={`${buttonStyles({ variant: "bordered", radius: "full" })} w-fit flex items-center justify-center`}
-      >
-        <div className="w-4 h-4">
-          <img src="star.svg" className="dark:invert" alt="Star Icon" />
-        </div>
-        <span className="text-xs">Certificate</span>
-      </div>
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-2">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
         {certificate.map((cert, index) => (
-          <Card key={index} isFooterBlurred className="w-full h-[200px]">
+          <GlassCard key={index} className="w-full h-[200px] relative p-0 overflow-hidden group">
             <Image
               removeWrapper
               alt={`${cert.name} background`}
-              className="z-0 w-full h-full object-cover"
-              src={cert.image} // Menggunakan properti `image`
+              className="z-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              src={cert.image}
             />
-            <CardFooter className="absolute bg-black/40 bottom-0 z-10 border-t-1 border-default-600 dark:border-default-100">
-              <div className="flex flex-grow gap-2 items-center">
-                <div className="flex flex-col">
-                  <p className="text-tiny text-white/60">{`${cert.company} - ${cert.year}`}</p>
-                  <p className="text-sm text-white/60">{cert.name}</p>
-                </div>
+            <div className="absolute bottom-0 w-full z-10 p-3 bg-black/40 backdrop-blur-md border-t border-white/10 flex justify-between items-center">
+              <div className="flex flex-col">
+                <p className="text-tiny text-white/80">{`${cert.company} - ${cert.year}`}</p>
+                <p className="text-sm text-white font-medium truncate max-w-[150px]">{cert.name}</p>
               </div>
-              <Button onPress={() => handleView(cert)} radius="full" size="sm">
+              <Button onPress={() => handleView(cert)} radius="full" size="sm" variant="flat" className="bg-white/20 text-white hover:bg-white/30">
                 View
               </Button>
-            </CardFooter>
-          </Card>
+            </div>
+          </GlassCard>
         ))}
       </div>
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur" classNames={{
+        base: "bg-black/50 backdrop-blur-md border border-white/10 text-white"
+      }}>
         <ModalContent>
           {(onClose) => (
             <>
@@ -76,15 +67,15 @@ export default function Certificate({ certificate }: { certificate: Certificate[
                 <Image
                   removeWrapper
                   alt={`${selectedCertificate?.name} image`}
-                  className="rounded-md "
+                  className="rounded-md w-full object-cover"
                   src={selectedCertificate?.image || "placeholder.png"}
                 />
-                <p>
+                <p className="text-white/90">
                   This certificate verifies the completion of the program "{selectedCertificate?.name}" conducted by{" "}
                   {selectedCertificate?.company}.
                 </p>
-                <Divider />
-                <p className="font-thin">
+                <Divider className="bg-white/20" />
+                <p className="font-thin text-white/70">
                   {selectedCertificate?.company || "N/A"} - {selectedCertificate?.year || "N/A"}
                 </p>
               </ModalBody>
