@@ -5,7 +5,12 @@ import { ArrowLeft, Calendar, User } from "lucide-react";
 import { notFound } from "next/navigation";
 
 async function getPost(slug: string) {
-  const apiUrl = process.env.FPH_API_URL || "http://localhost:2026";
+  let apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:2026";
+
+  if (!apiUrl.startsWith("http")) {
+    apiUrl = `https://${apiUrl}`;
+  }
+
   const res = await fetch(`${apiUrl}/api/blog/${slug}`, { cache: "no-store" });
   if (res.status === 404) return null;
   if (!res.ok) {
@@ -23,7 +28,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-6 py-10">
+    <div className="w-full pb-16">
       <Link
         href="/blog"
         className="inline-flex items-center gap-2 text-default-500 hover:text-primary transition-colors mb-8 group"
@@ -34,7 +39,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
       <article>
         <header className="mb-10 text-center">
-          <h1 className={title({ size: "lg", color: "foreground", class: "mb-6" })}>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-black dark:from-white to-black/50 dark:to-white/50 tracking-tight">
             {post.title}
           </h1>
 
