@@ -74,7 +74,7 @@ export const Sidebar = () => {
           <div className="flex flex-col items-center gap-4">
             <Divider className="bg-black/20 dark:bg-white/20 w-full" />
             <div className="flex flex-col gap-2 items-center">
-              {siteConfig.links.map((item) => (
+              {siteConfig.socials.map((item) => (
                 <Tooltip key={item.href} content={item.label || "Link"} placement="right">
                   <NextLink
                     className={"p-2 text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 duration-300 rounded-xl transition-all hover:scale-110"}

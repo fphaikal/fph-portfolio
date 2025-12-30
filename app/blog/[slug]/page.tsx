@@ -1,5 +1,6 @@
 import { title, subtitle } from "@/components/primitives";
 import MarkdownRenderer from "@/components/blog/markdown-renderer";
+import ViewTracker from "@/components/blog/view-tracker";
 import Link from "next/link";
 import { ArrowLeft, Calendar, User } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -29,6 +30,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="w-full pb-16">
+      <ViewTracker slug={slug} />
       <Link
         href="/blog"
         className="inline-flex items-center gap-2 text-default-500 hover:text-primary transition-colors mb-8 group"

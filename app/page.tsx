@@ -130,6 +130,32 @@ export default function Home() {
         </div>
 
       </div>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Person",
+            name: "Fahreza Pasha Haikal",
+            alternateName: ["FPHaikal", "FPH", "Fahreza Haikal"],
+            url: "https://www.fph.my.id",
+            image: "https://www.fph.my.id/og-image.png",
+            sameAs: [
+              "https://github.com/fphaikal",
+              "https://instagram.com/fp_haikal",
+              "https://linkedin.com/in/fphaikal",
+            ],
+            jobTitle: "IT Support Specialist",
+            worksFor: {
+              "@type": "Organization",
+              name: "PT Astra Graphia Tbk",
+            },
+            description: "Mechatronics Engineering Student and Full Stack Developer passionate about programming and automation.",
+            knowsAbout: ["Web Development", "Mechatronics", "Automation", "IT Support", "Next.js", "React"],
+          }),
+        }}
+      />
     </section>
   );
 }

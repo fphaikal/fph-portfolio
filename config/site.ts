@@ -9,8 +9,29 @@ import {
 import { AiFillSpotify, AiOutlineSpotify } from "react-icons/ai";
 
 export const siteConfig = {
-  name: "Fahreza Pasha Haikal",
-  description: "I'm a vocational high school student interning in mechatronics, with expertise in full-stack development. Passionate about programming.",
+  name: "FPHaikal",
+  title: "Fahreza Pasha Haikal - IT Support Specialist & Full Stack Developer",
+  description: "Portfolio of Fahreza Pasha Haikal (FPHaikal), an IT Support Specialist and Mechatronics Engineering student passionate about full-stack development, automation, and creating immersive digital experiences.",
+  keywords: [
+    "Fahreza Pasha Haikal",
+    "FPHaikal",
+    "FPH",
+    "IT Support Specialist",
+    "Full Stack Developer",
+    "Web Developer",
+    "Mechatronics Engineering",
+    "Next.js Developer",
+    "React Developer",
+    "Indonesia",
+    "Portfolio"
+  ],
+  url: "https://www.fph.my.id",
+  ogImage: "https://www.fph.my.id/og-image.png",
+  links: {
+    github: "https://github.com/fphaikal",
+    instagram: "https://instagram.com/fp_haikal",
+    linkedin: "https://linkedin.com/in/fphaikal",
+  },
   navItems: [
     {
       label: "Home",
@@ -65,7 +86,7 @@ export const siteConfig = {
       href: "/logout",
     },
   ],
-  links: [
+  socials: [
     {
       label: "Instagram",
       href: "https://instagram.com/fp_haikal",
