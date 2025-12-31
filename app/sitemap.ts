@@ -20,9 +20,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       apiUrl = `https://${apiUrl}`;
     }
 
-    const res = await fetch(`${apiUrl}/api/blog`, { cache: "no-store" });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+    const res = await fetch(`${apiUrl}/api/blog`, {
+      next: { revalidate: 3600 }, // Cache for 1 hour
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
     if (res.ok) {
       const posts: any[] = await res.json();
+      if (!Array.isArray(posts)) {
+        console.error("API response is not an array");
+        return [...routes];
+      }
       const blogRoutes = posts.map((post) => ({
         url: `${siteConfig.url}/blog/${post.slug}`,
         lastModified: new Date(post.created_at).toISOString().split('T')[0],
