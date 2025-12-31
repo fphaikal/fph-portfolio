@@ -4,6 +4,7 @@ import Link from "next/link";
 import clsx from "clsx";
 
 import { Providers } from "./providers";
+import StructuredData from "./structured-data";
 
 import { siteConfig } from "@/config/site";
 import { ibrand, fontSans } from "@/config/fonts";
@@ -24,7 +25,16 @@ export const metadata: Metadata = {
     },
   ],
   creator: siteConfig.name,
+  publisher: siteConfig.name,
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   metadataBase: new URL(siteConfig.url),
+  alternates: {
+    canonical: siteConfig.url,
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -54,6 +64,18 @@ export const metadata: Metadata = {
   verification: {
     google: "IZG0T7Kur6rnPfSLhdjXz-sYLqiE_tAK_jJ51-58VUE",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      noimageindex: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export const viewport: Viewport = {
@@ -78,6 +100,7 @@ export default function RootLayout({
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
+          <StructuredData />
           <FluidBackground />
           <div className="flex w-full min-h-screen">
             <Sidebar />
