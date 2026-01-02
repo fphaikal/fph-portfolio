@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import Link from "next/link";
 import clsx from "clsx";
+import Script from "next/script";
 
 import { Providers } from "./providers";
 import StructuredData from "./structured-data";
@@ -10,6 +11,9 @@ import { siteConfig } from "@/config/site";
 import { ibrand, fontSans } from "@/config/fonts";
 import { Sidebar } from "@/components/sidebar";
 import FluidBackground from "@/components/ui/fluid-background";
+
+// Google Analytics Measurement ID
+const GA_MEASUREMENT_ID = "G-F3Z55Y6Y59";
 
 export const metadata: Metadata = {
   title: {
@@ -92,6 +96,21 @@ export default function RootLayout({
 }) {
   return (
     <html suppressHydrationWarning lang="en">
+      <head>
+        {/* Google Analytics */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
+          `}
+        </Script>
+      </head>
       <body
         className={clsx(
           "min-h-screen font-sans antialiased",
