@@ -1,159 +1,199 @@
-import dynamic from "next/dynamic";
-import { button as buttonStyles } from "@nextui-org/theme";
-import { title, subtitle } from "@/components/primitives";
-import { GithubIcon } from "@/components/icons";
-import { Avatar, Button, Card, CardBody, CardFooter, CardHeader, Chip, Divider, Image, Tooltip } from "@nextui-org/react";
+import type { Metadata } from "next";
+import Link from "next/link";
 
-const Certificate = dynamic(() => import("@/components/home/certificate"), {ssr: false});
-const Portfolio = dynamic(() => import("@/components/home/portfolio"), {ssr: false});
-const RunningScroll = dynamic(() => import("@/components/home/RunningScroll"), {ssr: false});
-const Hero = dynamic(() => import("@/components/home/hero"), {ssr: false});
-const SpotifyStats = dynamic(() => import("@/components/spotify/now-playing"), {ssr: false});
-const GithubStats = dynamic(() => import("@/components/github/index"), {ssr: false});
+import Certificate from "@/components/home/certificate";
+import Experience from "@/components/home/experience";
+import Hero from "@/components/home/hero";
+import Portfolio, { type Project } from "@/components/home/portfolio";
+import SkillGrid from "@/components/home/skill-grid";
+import SpotifyStats from "@/components/spotify/now-playing";
+import StructuredData from "./structured-data";
+import { siteConfig } from "@/config/site";
+
+export const metadata: Metadata = {
+  title: { absolute: siteConfig.title },
+  description: siteConfig.description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "profile",
+    url: siteConfig.url,
+    title: siteConfig.title,
+    description: siteConfig.description,
+  },
+};
+
+export const revalidate = 3600;
+
+async function getProjects(): Promise<Project[] | null> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!apiUrl) return null;
+
+  const baseUrl = apiUrl.startsWith("http") ? apiUrl : `https://${apiUrl}`;
+
+  try {
+    const response = await fetch(`${baseUrl}/api/projects`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    return data.data || data || [];
+  } catch {
+    return null;
+  }
+}
 
 const skill = [
-  {
-    name: "Next.js",
-    description: "React Framework for Production",
-    className: " dark:invert",
-    icon: "nextjs.svg",
-  },
-  {
-    name: "Vue.js",
-    description: "The Progressive JavaScript Framework",
-    className: "",
-    icon: "vuejs.svg",
-  },
-  {
-    name: "Nuxt.js",
-    description: "The Intuitive Vue Framework",
-    className: "",
-    icon: "nuxt.svg",
-  },
-  {
-    name: "Tailwind CSS",
-    description: "A utility-first CSS framework",
-    className: "",
-    icon: "tailwindcss.svg",
-  },
-  {
-    name: "TypeScript",
-    description: "Typed JavaScript at Any Scale",
-    className: "",
-    icon: "ts.svg",
-  },
-  {
-    name: "JavaScript",
-    description: "High-level, interpreted programming language",
-    className: "",
-    icon: "js.svg",
-  },
-  {
-    name: "Vercel",
-    description: "Develop. Preview. Ship.",
-    className: " dark:invert",
-    icon: "vercel.svg",
-  },
-  {
-    name: "Node.js",
-    description: "JavaScript runtime built on Chrome's V8 JavaScript engine",
-    className: "",
-    icon: "nodejs.svg",
-  },
-  {
-    name: "MongoDB",
-    description: "The most popular database for modern apps",
-    className: "",
-    icon: "mongodb.svg",
-  },
-  {
-    name: "Arduino",
-    description: "Open-source electronics platform based on easy-to-use hardware and software",
-    className: "",
-    icon: "arduino.svg",
-  },
-  {
-    name: "Raspberry Pi",
-    description: "A small and affordable computer that you can use to learn programming",
-    className: "",
-    icon: "raspberry-pi.svg",
-  },
-  {
-    name: "SolidWorks",
-    description: "3D CAD software",
-    className: "",
-    icon: "solidworks.svg",
-  }
-]
+  { name: "Next.js", description: "React Framework", className: "dark:invert", icon: "nextjs.svg" },
+  { name: "Vue.js", description: "Progressive Framework", className: "", icon: "vuejs.svg" },
+  { name: "Nuxt.js", description: "Intuitive Vue Framework", className: "", icon: "nuxt.svg" },
+  { name: "Tailwind CSS", description: "Utility-first CSS", className: "", icon: "tailwindcss.svg" },
+  { name: "TypeScript", description: "Typed JavaScript", className: "", icon: "ts.svg" },
+  { name: "JavaScript", description: "Web Language", className: "", icon: "js.svg" },
+  { name: "Vercel", description: "Deployment Platform", className: "dark:invert", icon: "vercel.svg" },
+  { name: "Node.js", description: "JS Runtime", className: "", icon: "nodejs.svg" },
+  { name: "MongoDB", description: "NoSQL Database", className: "", icon: "mongodb.svg" },
+  { name: "Arduino", description: "Electronics Platform", className: "", icon: "arduino.svg" },
+  { name: "Raspberry Pi", description: "Single-board Computer", className: "", icon: "raspberry-pi.svg" },
+  { name: "SolidWorks", description: "3D CAD", className: "", icon: "solidworks.svg" }
+];
 
-const project = [
-  {
-    name: "QC Report Web App",
-    thumb: "QC",
-    description: "The Quality Pintar website is a web application designed to monitor and manage quality-related data in a factory, with a focus on four main sections:\n\n1. Final Inspection: The final check of products before being shipped to customers, ensuring they meet quality standards.\n2. NCR (Non-Conformance Report): A reporting system to document issues found during inspections and the corrective actions taken.\n3. IPR (Initial Production Run): The initial production phase that verifies product quality at the early stage before mass production.\n4. NG Data (Non-Good Data): Data related to products that fail to meet quality standards, including details about the failure causes and required fixes.\n\nThe website also uses an API to fetch and manage data, with a role-based system restricting access depending on the user type. Admin roles have access to all sections, while user roles can only view data.",
-    client: "PT Denapella Lestari",
-    tech: ["mongodb", "nextjs", "nodejs", "express"],
-    url: ""
-  },
-  {
-    name: "Gerbang Akses Pintar dan Kehadiran",
-    thumb: "GASKAN",
-    description: "The Gerbang Akses Pintar dan Kehadiran (GASKAN) is a web-based application designed for student attendance management at SMK SMTI Yogyakarta. This system simplifies and automates the attendance process, providing an efficient and reliable solution for tracking and managing student presence.",
-    client: "SMK SMTI Yogyakarta",
-    tech: ["nuxt", "nodejs", "express"],
-    url: ""
-  },
-  {
-    name: "Chemicfest #8 Web App",
-    thumb: "CF#8",
-    description: "The Chemicfest#8 website is an online platform designed for the annual Chemicalistronic Festival (CHEMICFEST) #8, which serves as entertainment for the students of SMK-SMTI Yogyakarta. This festival is a showcase of talents from the students, especially those involved in extracurricular activities. The website facilitates ticket purchases, check-in for entering the venue, and live streaming of the event, providing an all-in-one solution for attendees to engage with the festival.",
-    client: "OSIS SMK SMTI Yogyakarta",
-    tech: ["nuxt", "nodejs", "express"],
-    url: ""
-  },
-  {
-    name: "TokDL",
-    thumb: "TokDL",
-    description: "The TokDL website is an online tool designed to download TikTok videos easily. It provides users with a simple and efficient way to save videos for offline viewing without watermarks.",
-    client: "Personal Project",
-    tech: ["nextjs", "nodejs"],
-    url: "https://tokdl.fph.my.id"
-  }
-]
+
 
 const certificates = [
   {
     name: "Siemens Mechatronics System Certification Program",
     company: "SIEMENS",
     year: "2024",
-    image: "/smscp.png",
+    image: "/smscp.webp",
   },
   {
     name: "Learn the Basics of Web Programming",
     company: "Dicoding",
     year: "2025",
-    image: "/web-developer.png",
+    image: "/web-developer.webp",
   },
 ];
-export default function Home() {
+
+const experiences = [
+  {
+    title: "IT Support Specialist",
+    company: "PT Astra Graphia Tbk",
+    companyLogo: "/astra-graphia-icon.svg",
+    companyColor: "#6E1D46", // Astra Graphia brand maroon
+    type: "Internship",
+    startDate: "Feb 2025",
+    endDate: "Present",
+    duration: "11 mos",
+    location: "Central Jakarta, Jakarta, Indonesia",
+    locationType: "On-site",
+    description: "An IT Specialist with cross-functional expertise in development, data, and automation to drive efficiency and enable data-driven decision-making.",
+    highlights: [
+      "Application & Web Development: Built the 'iScore' web application for KPI monitoring and managed server/web environment setups to support other technical teams.",
+      "Data Analysis & Business Intelligence: Translated business requirements into measurable metrics, building real-time Power BI dashboards to monitor service productivity and performance.",
+      "Process Automation: Identified and automated manual workflows using n8n to boost productivity and minimize the potential for human error."
+    ]
+  }
+];
+
+export default async function Home() {
+  const projects = await getProjects();
+
   return (
-    <section className="flex flex-col gap-8 py-20 md:py-10 min-h-screen">
-      <Hero/>
-      <RunningScroll items={skill} /> 
-      <div className="flex flex-col xl:flex-row gap-4">
-        <GithubStats />
-        <div className="flex flex-col gap-4 w-full xl:w-1/2">
-          <div className={`${buttonStyles({ variant: "bordered", radius: "full" })} w-fit flex items-center justify-center`}>
-            <div className="w-4 h-4">
-              <img src={'star.svg'} className="dark:invert" alt="Star Icon" />
-            </div>
-            <span className="text-xs ">Spotify</span>
-          </div>
-          <SpotifyStats />
+    <section className="relative min-h-screen p-4 md:p-8 max-w-7xl mx-auto overflow-hidden">
+      <StructuredData />
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-min pb-20">
+
+        {/* Hero Section */}
+        <div className="col-span-1 md:col-span-12 min-h-[70vh] flex items-center justify-center">
+          <Hero />
         </div>
+
+        <section
+          aria-labelledby="about-fahreza"
+          className="col-span-1 md:col-span-12 max-w-4xl mx-auto text-center space-y-5 pb-14"
+          id="about"
+        >
+          <h2 id="about-fahreza" className="text-3xl md:text-5xl font-bold tracking-tight">
+            About Fahreza Pasha Haikal
+          </h2>
+          <p className="text-base md:text-lg text-foreground/70 leading-relaxed">
+            Fahreza Pasha Haikal, known online as FPHaikal or FPH, is an IT Support Specialist,
+            full-stack developer, and Mechatronics Engineering student based in Indonesia. He
+            builds web applications, automation workflows, and data-driven tools that turn
+            operational needs into practical digital solutions.
+          </p>
+          <p className="text-sm md:text-base text-foreground/60 leading-relaxed">
+            Explore his selected projects and professional experience below, or visit his{" "}
+            <Link className="underline underline-offset-4 hover:text-primary" href={siteConfig.links.github} rel="me">
+              GitHub profile
+            </Link>{" "}
+            and{" "}
+            <Link className="underline underline-offset-4 hover:text-primary" href={siteConfig.links.linkedin} rel="me">
+              LinkedIn profile
+            </Link>
+            .
+          </p>
+        </section>
+
+        {/* Skills Grid */}
+        <div className="col-span-1 md:col-span-12">
+          <SkillGrid items={skill} />
+        </div>
+
+        {/* Experience Section */}
+        <div className="col-span-1 md:col-span-12 mt-20 mb-8" id="experience">
+          <h2 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-black dark:from-white to-black/50 dark:to-white/50 tracking-tighter">
+            Professional Experience
+          </h2>
+        </div>
+
+        <div className="col-span-1 md:col-span-12">
+          <Experience experiences={experiences} />
+        </div>
+
+        {/* Stats Row */}
+        <div className="col-span-1 md:col-span-12 grid grid-cols-1 md:grid-cols-5 gap-2 items-center mt-20">
+          {/* <GlassCard className="" intensity="medium">
+            <GithubStats />
+          </GlassCard> */}
+
+          <h2 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-black dark:from-white to-black/50 dark:to-white/50 tracking-tighter">
+            My<br /> Spotify
+          </h2>
+
+          <div className="col-span-4">
+            <SpotifyStats className="" />
+          </div>
+        </div>
+
+        {/* Projects Section */}
+        <div className="col-span-1 md:col-span-12 mt-20 mb-8" id="projects">
+          <h2 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-black dark:from-white to-black/50 dark:to-white/50 tracking-tighter">
+            Selected Projects
+          </h2>
+        </div>
+
+        <div className="col-span-1 md:col-span-12">
+          <Portfolio initialProjects={projects} />
+        </div>
+
+        {/* Certificates Section */}
+        <div className="col-span-1 md:col-span-12 mt-20 mb-8">
+          <h2 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-black dark:from-white to-black/50 dark:to-white/50 tracking-tighter">
+            Certifications
+          </h2>
+        </div>
+
+        <div className="col-span-1 md:col-span-12">
+          <Certificate certificate={certificates} />
+        </div>
+
       </div>
-      <Portfolio project={project} />
-      <Certificate certificate={certificates} />
+
     </section>
   );
 }
