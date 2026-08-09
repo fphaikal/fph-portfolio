@@ -17,7 +17,7 @@ import { motion } from 'framer-motion';
 import GlassCard from '@/components/ui/glass-card';
 import { RiExternalLinkLine, RiGlobalLine, RiGithubLine } from 'react-icons/ri';
 
-interface Project {
+export interface Project {
   name: string;
   thumb: string;
   description: string;
@@ -39,9 +39,9 @@ const techIcons: Record<string, string> = {
   tailwindcss: '/tailwindcss.svg',
 };
 
-export default function Portfolio() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+export default function Portfolio({ initialProjects }: { initialProjects: Project[] | null }) {
+  const [projects, setProjects] = useState<Project[]>(initialProjects || []);
+  const [loading, setLoading] = useState<boolean>(initialProjects === null);
   const [error, setError] = useState<boolean>(false);
 
   // Modal state
@@ -49,10 +49,15 @@ export default function Portfolio() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
+    if (initialProjects !== null) return;
+
     const fetchData = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const response = await fetch(`https://${apiUrl}/api/projects`);
+        if (!apiUrl) throw new Error('Project API URL is not configured');
+
+        const baseUrl = apiUrl.startsWith('http') ? apiUrl : `https://${apiUrl}`;
+        const response = await fetch(`${baseUrl}/api/projects`);
         if (!response.ok) {
           throw new Error('Failed to fetch');
         }
@@ -67,7 +72,7 @@ export default function Portfolio() {
     };
 
     fetchData();
-  }, []);
+  }, [initialProjects]);
 
   const handleProjectClick = (project: Project) => {
     setSelectedProject(project);

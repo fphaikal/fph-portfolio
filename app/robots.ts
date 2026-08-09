@@ -9,21 +9,22 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: [
           '/api/',
-          '/_next/',
           '/private/',
-          '/*.json$',
         ],
       },
-      // Block AI training bots (optional but good practice as seen in lab repo)
       {
-        userAgent: ['GPTBot', 'Google-Extended', 'CCBot'],
-        disallow: '/',
-      },
-      // Explicitly allow major search engines
-      {
-        userAgent: ['Googlebot', 'Bingbot', 'YandexBot', 'facebookexternalhit'],
+        userAgent: ['Googlebot', 'Bingbot'],
         allow: '/',
-        crawlDelay: 1,
+        disallow: ['/api/', '/private/'],
+      },
+      {
+        userAgent: ['OAI-SearchBot', 'ChatGPT-User', 'PerplexityBot', 'Google-Extended'],
+        allow: '/',
+        disallow: ['/api/', '/private/'],
+      },
+      {
+        userAgent: ['GPTBot', 'CCBot'],
+        disallow: '/',
       },
     ],
     sitemap: `${siteConfig.url}/sitemap.xml`,

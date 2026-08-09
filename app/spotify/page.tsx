@@ -1,6 +1,21 @@
+import type { Metadata } from "next";
+
 import SpotifyNowPlaying from "@/components/spotify/now-playing";
 import SpotifyRecentlyPlayed from "@/components/spotify/recently-played";
 import { RiSpotifyFill } from "react-icons/ri";
+import { siteConfig } from "@/config/site";
+
+export const metadata: Metadata = {
+  title: `Spotify Activity | ${siteConfig.fullName}`,
+  description: `Current and recently played music from ${siteConfig.fullName} (${siteConfig.name}).`,
+  alternates: { canonical: "/spotify" },
+  openGraph: {
+    type: "website",
+    url: `${siteConfig.url}/spotify`,
+    title: `Spotify Activity | ${siteConfig.fullName}`,
+    description: `Music activity from ${siteConfig.fullName}.`,
+  },
+};
 
 export default function SpotifyPage() {
   return (

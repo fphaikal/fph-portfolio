@@ -17,8 +17,13 @@ export default function Hero() {
         transition={{ duration: 1, ease: "easeOut" }}
         className="flex flex-col items-center gap-6 md:gap-8"
       >
-        <h1 className="text-7xl md:text-9xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-black dark:from-white to-black/40 dark:to-white/40 drop-shadow-2xl">
-          FPHaikal
+        <h1 className="flex flex-col items-center font-bold tracking-tighter drop-shadow-2xl">
+          <span className="text-7xl md:text-9xl text-transparent bg-clip-text bg-gradient-to-b from-black dark:from-white to-black/40 dark:to-white/40">
+            FPHaikal
+          </span>
+          <span className="mt-3 text-xl md:text-3xl tracking-tight text-black/75 dark:text-white/75">
+            Fahreza Pasha Haikal
+          </span>
         </h1>
 
         <div className="space-y-4 max-w-3xl mx-auto px-4">
@@ -26,7 +31,7 @@ export default function Hero() {
             IT Support Specialist
           </h2>
           <p className="text-lg md:text-xl text-black/60 dark:text-white/60 font-light leading-relaxed">
-            Mechatronics Engineering Student crafting immersive digital experiences with code, creativity, and precision.
+            Also known as FPH, a Mechatronics Engineering student crafting immersive digital experiences with code, creativity, and precision.
           </p>
         </div>
 

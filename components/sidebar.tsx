@@ -25,7 +25,12 @@ export const Sidebar = () => {
           {/* Top Section - Logo & Navigation */}
           <div className="flex flex-col gap-4 items-center">
             <Tooltip content="FPH" placement="right">
-              <div className="p-2 bg-black/10 dark:bg-white/10 rounded-xl backdrop-blur-md shadow-sm">
+              <NextLink
+                aria-label={`${siteConfig.fullName} home`}
+                className="p-2 bg-black/10 dark:bg-white/10 rounded-xl backdrop-blur-md shadow-sm"
+                href="/"
+                title={`${siteConfig.name} home`}
+              >
                 <Image
                   alt="FPH Logo"
                   className="invert dark:invert-0"
@@ -33,7 +38,8 @@ export const Sidebar = () => {
                   src={"fph-logo.svg"}
                   width={24}
                 />
-              </div>
+                <span className="sr-only">{siteConfig.fullName} home</span>
+              </NextLink>
             </Tooltip>
             <Divider className="bg-black/20 dark:bg-white/20" />
             <div className="flex flex-col items-center gap-3">
@@ -41,25 +47,32 @@ export const Sidebar = () => {
                 <Tooltip key={item.href} content={item.label} placement="right">
                   {pathname === item.href ? (
                     <NextLink
+                      aria-current="page"
+                      aria-label={item.label}
                       className={clsx(
                         linkStyles({ color: "foreground" }),
                         "p-3 bg-primary/20 text-primary rounded-2xl shadow-glow transition-all duration-300",
                       )}
                       color="foreground"
                       href={item.href}
+                      title={item.label}
                     >
                       <item.icon size={22} />
+                      <span className="sr-only">{item.label}</span>
                     </NextLink>
                   ) : (
                     <NextLink
+                      aria-label={item.label}
                       className={clsx(
                         linkStyles({ color: "foreground" }),
                         "p-3 text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 rounded-2xl transition-all duration-300 hover:scale-110",
                       )}
                       color="foreground"
                       href={item.href}
+                      title={item.label}
                     >
                       <item.activeIcon size={22} />
+                      <span className="sr-only">{item.label}</span>
                     </NextLink>
                   )}
                 </Tooltip>
@@ -77,11 +90,16 @@ export const Sidebar = () => {
               {siteConfig.socials.map((item) => (
                 <Tooltip key={item.href} content={item.label || "Link"} placement="right">
                   <NextLink
+                    aria-label={item.label}
                     className={"p-2 text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 duration-300 rounded-xl transition-all hover:scale-110"}
                     color="foreground"
                     href={item.href}
+                    rel="me"
+                    target="_blank"
+                    title={item.label}
                   >
                     <item.icon size={20} />
+                    <span className="sr-only">{item.label}</span>
                   </NextLink>
                 </Tooltip>
               ))}

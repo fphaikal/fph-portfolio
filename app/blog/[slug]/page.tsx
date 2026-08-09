@@ -1,11 +1,23 @@
-import { title, subtitle } from "@/components/primitives";
+import type { Metadata } from "next";
+import { cache } from "react";
 import MarkdownRenderer from "@/components/blog/markdown-renderer";
 import ViewTracker from "@/components/blog/view-tracker";
 import Link from "next/link";
 import { ArrowLeft, Calendar, User } from "lucide-react";
 import { notFound } from "next/navigation";
+import { siteConfig } from "@/config/site";
 
-async function getPost(slug: string) {
+interface BlogPost {
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content: string;
+  cover_image?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+const getPost = cache(async (slug: string): Promise<BlogPost | null> => {
   let apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:2026";
 
   if (!apiUrl.startsWith("http")) {
@@ -18,6 +30,37 @@ async function getPost(slug: string) {
     throw new Error("Failed to fetch post");
   }
   return res.json();
+});
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPost(slug);
+
+  if (!post) return {};
+
+  const url = `${siteConfig.url}/blog/${post.slug || slug}`;
+  const description = post.excerpt || `An article by ${siteConfig.fullName}.`;
+
+  return {
+    title: post.title,
+    description,
+    authors: [{ name: siteConfig.fullName, url: siteConfig.url }],
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      url,
+      title: post.title,
+      description,
+      publishedTime: post.created_at,
+      modifiedTime: post.updated_at || post.created_at,
+      authors: [siteConfig.fullName],
+      images: post.cover_image ? [{ url: post.cover_image, alt: post.title }] : undefined,
+    },
+  };
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -28,8 +71,33 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound();
   }
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt || `An article by ${siteConfig.fullName}.`,
+    url: `${siteConfig.url}/blog/${post.slug || slug}`,
+    datePublished: post.created_at,
+    dateModified: post.updated_at || post.created_at,
+    image: post.cover_image || undefined,
+    author: {
+      "@type": "Person",
+      "@id": `${siteConfig.url}/#person`,
+      name: siteConfig.fullName,
+      url: siteConfig.url,
+    },
+    publisher: { "@id": `${siteConfig.url}/#person` },
+    mainEntityOfPage: `${siteConfig.url}/blog/${post.slug || slug}`,
+  };
+
   return (
     <div className="w-full pb-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleSchema).replace(/</g, "\\u003c"),
+        }}
+      />
       <ViewTracker slug={slug} />
       <Link
         href="/blog"
@@ -46,9 +114,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </h1>
 
           <div className="flex items-center justify-center gap-6 text-default-500 mb-8">
+            <Link className="flex items-center gap-2 hover:text-primary" href="/" rel="author">
+              <User size={18} />
+              <span>{siteConfig.fullName}</span>
+            </Link>
             <div className="flex items-center gap-2">
               <Calendar size={18} />
-              <span>{new Date(post.created_at).toLocaleDateString()}</span>
+              <time dateTime={post.created_at}>
+                {new Date(post.created_at).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </time>
             </div>
           </div>
 

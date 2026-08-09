@@ -10,8 +10,10 @@ import { AiFillSpotify, AiOutlineSpotify } from "react-icons/ai";
 
 export const siteConfig = {
   name: "FPHaikal",
-  title: "Fahreza Pasha Haikal - IT Support Specialist & Full Stack Developer",
-  description: "Portfolio of Fahreza Pasha Haikal (FPHaikal), an IT Support Specialist and Mechatronics Engineering student passionate about full-stack development, automation, and creating immersive digital experiences.",
+  fullName: "Fahreza Pasha Haikal",
+  alternateNames: ["FPHaikal", "FPH", "Fahreza Haikal"],
+  title: "Fahreza Pasha Haikal (FPHaikal) | IT Support & Full Stack Developer",
+  description: "Official portfolio of Fahreza Pasha Haikal, also known as FPHaikal and FPH—an IT Support Specialist and full-stack developer in Indonesia.",
   keywords: [
     "Fahreza Pasha Haikal",
     "FPHaikal",
@@ -26,7 +28,7 @@ export const siteConfig = {
     "Portfolio"
   ],
   url: "https://www.fph.my.id",
-  ogImage: "https://www.fph.my.id/og-image.png",
+  ogImage: "https://www.fph.my.id/opengraph-image",
   links: {
     github: "https://github.com/fphaikal",
     instagram: "https://instagram.com/fp_haikal",

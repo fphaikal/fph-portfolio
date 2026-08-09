@@ -1,9 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Note: optimizeFonts was removed in Next.js 16 (enabled by default)
-
-  // Add headers for sitemap and robots to ensure proper Content-Type
-  // Note: optimizeFonts was removed in Next.js 16 (enabled by default)
+  poweredByHeader: false,
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'fph.my.id',
+          },
+        ],
+        destination: 'https://www.fph.my.id/:path*',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

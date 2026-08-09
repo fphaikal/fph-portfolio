@@ -1,16 +1,49 @@
-"use client";
+import type { Metadata } from "next";
+import Link from "next/link";
 
-import dynamic from "next/dynamic";
-import FluidBackground from "@/components/ui/fluid-background";
-import GlassCard from "@/components/ui/glass-card";
+import Certificate from "@/components/home/certificate";
+import Experience from "@/components/home/experience";
+import Hero from "@/components/home/hero";
+import Portfolio, { type Project } from "@/components/home/portfolio";
+import SkillGrid from "@/components/home/skill-grid";
+import SpotifyStats from "@/components/spotify/now-playing";
+import StructuredData from "./structured-data";
+import { siteConfig } from "@/config/site";
 
-const Certificate = dynamic(() => import("@/components/home/certificate"), { ssr: false });
-const Portfolio = dynamic(() => import("@/components/home/portfolio"), { ssr: false });
-const SkillGrid = dynamic(() => import("@/components/home/skill-grid"), { ssr: false });
-const Hero = dynamic(() => import("@/components/home/hero"), { ssr: false });
-const SpotifyStats = dynamic(() => import("@/components/spotify/now-playing"), { ssr: false });
-const GithubStats = dynamic(() => import("@/components/github/index"), { ssr: false });
-const Experience = dynamic(() => import("@/components/home/experience"), { ssr: false });
+export const metadata: Metadata = {
+  title: { absolute: siteConfig.title },
+  description: siteConfig.description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "profile",
+    url: siteConfig.url,
+    title: siteConfig.title,
+    description: siteConfig.description,
+  },
+};
+
+export const revalidate = 3600;
+
+async function getProjects(): Promise<Project[] | null> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!apiUrl) return null;
+
+  const baseUrl = apiUrl.startsWith("http") ? apiUrl : `https://${apiUrl}`;
+
+  try {
+    const response = await fetch(`${baseUrl}/api/projects`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    return data.data || data || [];
+  } catch {
+    return null;
+  }
+}
 
 const skill = [
   { name: "Next.js", description: "React Framework", className: "dark:invert", icon: "nextjs.svg" },
@@ -65,9 +98,12 @@ const experiences = [
   }
 ];
 
-export default function Home() {
+export default async function Home() {
+  const projects = await getProjects();
+
   return (
     <section className="relative min-h-screen p-4 md:p-8 max-w-7xl mx-auto overflow-hidden">
+      <StructuredData />
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-min pb-20">
 
@@ -75,6 +111,33 @@ export default function Home() {
         <div className="col-span-1 md:col-span-12 min-h-[70vh] flex items-center justify-center">
           <Hero />
         </div>
+
+        <section
+          aria-labelledby="about-fahreza"
+          className="col-span-1 md:col-span-12 max-w-4xl mx-auto text-center space-y-5 pb-14"
+          id="about"
+        >
+          <h2 id="about-fahreza" className="text-3xl md:text-5xl font-bold tracking-tight">
+            About Fahreza Pasha Haikal
+          </h2>
+          <p className="text-base md:text-lg text-foreground/70 leading-relaxed">
+            Fahreza Pasha Haikal, known online as FPHaikal or FPH, is an IT Support Specialist,
+            full-stack developer, and Mechatronics Engineering student based in Indonesia. He
+            builds web applications, automation workflows, and data-driven tools that turn
+            operational needs into practical digital solutions.
+          </p>
+          <p className="text-sm md:text-base text-foreground/60 leading-relaxed">
+            Explore his selected projects and professional experience below, or visit his{" "}
+            <Link className="underline underline-offset-4 hover:text-primary" href={siteConfig.links.github} rel="me">
+              GitHub profile
+            </Link>{" "}
+            and{" "}
+            <Link className="underline underline-offset-4 hover:text-primary" href={siteConfig.links.linkedin} rel="me">
+              LinkedIn profile
+            </Link>
+            .
+          </p>
+        </section>
 
         {/* Skills Grid */}
         <div className="col-span-1 md:col-span-12">
@@ -84,7 +147,7 @@ export default function Home() {
         {/* Experience Section */}
         <div className="col-span-1 md:col-span-12 mt-20 mb-8" id="experience">
           <h2 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-black dark:from-white to-black/50 dark:to-white/50 tracking-tighter">
-            Experience
+            Professional Experience
           </h2>
         </div>
 
@@ -115,7 +178,7 @@ export default function Home() {
         </div>
 
         <div className="col-span-1 md:col-span-12">
-          <Portfolio />
+          <Portfolio initialProjects={projects} />
         </div>
 
         {/* Certificates Section */}
@@ -131,31 +194,6 @@ export default function Home() {
 
       </div>
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Person",
-            name: "Fahreza Pasha Haikal",
-            alternateName: ["FPHaikal", "FPH", "Fahreza Haikal"],
-            url: "https://www.fph.my.id",
-            image: "https://www.fph.my.id/og-image.png",
-            sameAs: [
-              "https://github.com/fphaikal",
-              "https://instagram.com/fp_haikal",
-              "https://linkedin.com/in/fphaikal",
-            ],
-            jobTitle: "IT Support Specialist",
-            worksFor: {
-              "@type": "Organization",
-              name: "PT Astra Graphia Tbk",
-            },
-            description: "Mechatronics Engineering Student and Full Stack Developer passionate about programming and automation.",
-            knowsAbout: ["Web Development", "Mechatronics", "Automation", "IT Support", "Next.js", "React"],
-          }),
-        }}
-      />
     </section>
   );
 }

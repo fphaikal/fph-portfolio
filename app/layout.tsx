@@ -5,7 +5,6 @@ import clsx from "clsx";
 import Script from "next/script";
 
 import { Providers } from "./providers";
-import StructuredData from "./structured-data";
 
 import { siteConfig } from "@/config/site";
 import { ibrand, fontSans } from "@/config/fonts";
@@ -24,21 +23,18 @@ export const metadata: Metadata = {
   keywords: siteConfig.keywords,
   authors: [
     {
-      name: siteConfig.name,
+      name: siteConfig.fullName,
       url: siteConfig.url,
     },
   ],
-  creator: siteConfig.name,
-  publisher: siteConfig.name,
+  creator: siteConfig.fullName,
+  publisher: siteConfig.fullName,
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   metadataBase: new URL(siteConfig.url),
-  alternates: {
-    canonical: siteConfig.url,
-  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -60,7 +56,6 @@ export const metadata: Metadata = {
     title: siteConfig.title,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
-    creator: "@fp_haikal", // Assuming this handle from Instagram/Github context, or generic
   },
   icons: {
     icon: "/favicon.ico",
@@ -74,7 +69,6 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      noimageindex: true,
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
@@ -119,7 +113,6 @@ export default function RootLayout({
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          <StructuredData />
           <FluidBackground />
           <div className="flex w-full min-h-screen">
             <Sidebar />
