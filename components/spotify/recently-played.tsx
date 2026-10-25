@@ -1,10 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Skeleton } from "@heroui/react";
-import { RiSpotifyFill, RiPlayFill } from 'react-icons/ri';
-import { motion } from 'framer-motion';
-import GlassCard from '@/components/ui/glass-card';
+
+import { Card } from "@/components/deck/card";
 
 interface Track {
   name: string;
@@ -13,6 +11,43 @@ interface Track {
   albumImageUrl: string;
   url: string;
   playedAt?: string;
+  duration_ms?: number;
+}
+
+/** Format milliseconds as MM:SS. */
+function formatDuration(milliseconds: number): string {
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function formatTimeAgo(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+}
+
+interface SectionHeaderProps {
+  meta: string;
+}
+
+/** Kepala daftar bersama — eyebrow di kiri, meta redup di kanan. */
+function SectionHeader({ meta }: SectionHeaderProps) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="deck-eyebrow">Recently played</span>
+      <span className="deck-readout text-deck-sm text-deck-ink/60">{meta}</span>
+    </div>
+  );
 }
 
 export default function SpotifyRecentlyPlayed() {
@@ -30,7 +65,7 @@ export default function SpotifyRecentlyPlayed() {
         const data = await response.json();
         setTracks(data.data || []);
         setLoading(false);
-      } catch (err) {
+      } catch {
         setError(true);
         setLoading(false);
       }
@@ -39,107 +74,90 @@ export default function SpotifyRecentlyPlayed() {
     fetchData();
   }, []);
 
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${diffDays}d ago`;
-  };
-
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <Skeleton key={index} className="w-full h-24 rounded-2xl" />
-        ))}
-      </div>
+      <Card contentClassName="p-6 sm:p-8">
+        <SectionHeader meta="Loading" />
+        <div className="mt-6 flex flex-col gap-4">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="h-11 w-full animate-pulse rounded-card-sm bg-deck-ink/10" />
+          ))}
+        </div>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <GlassCard intensity="medium" className="p-6">
-        <div className="flex items-center justify-center gap-3">
-          <RiSpotifyFill size={24} className="text-red-500" />
-          <p className="text-red-500">Failed to load recently played</p>
-        </div>
-      </GlassCard>
+      <Card contentClassName="p-6 sm:p-8">
+        <SectionHeader meta="Unavailable" />
+        <p className="mt-6 text-deck-base text-deck-ink/70">
+          We couldn&apos;t load the recent tracks right now. Please check back
+          in a moment.
+        </p>
+      </Card>
     );
   }
 
   if (!tracks || tracks.length === 0) {
     return (
-      <GlassCard intensity="medium" className="p-6">
-        <div className="flex items-center justify-center gap-3">
-          <RiSpotifyFill size={24} className="text-foreground/40" />
-          <p className="text-foreground/60">No recently played tracks</p>
-        </div>
-      </GlassCard>
+      <Card contentClassName="p-6 sm:p-8">
+        <SectionHeader meta="Empty" />
+        <p className="deck-readout mt-6 text-deck-base text-deck-ink/70">
+          Nothing has been played recently.
+        </p>
+      </Card>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {tracks.map((track, index) => (
-        <motion.a
-          key={`${track.name}-${index}`}
-          href={track.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.05 }}
-          whileHover={{ scale: 1.02 }}
-        >
-          <GlassCard
-            intensity="low"
-            className="p-4 h-full transition-all duration-300 group-hover:bg-white/10 dark:group-hover:bg-white/10"
-          >
-            <div className="flex items-center gap-4">
-              {/* Album Art */}
-              <div className="relative shrink-0 overflow-hidden rounded-lg">
-                <img
-                  alt={`${track.name} album cover`}
-                  src={track.albumImageUrl}
-                  className="w-14 h-14 object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                {/* Play overlay on hover */}
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <RiPlayFill size={24} className="text-white" />
-                </div>
-              </div>
+    <Card contentClassName="p-6 sm:p-8">
+      <SectionHeader
+        meta={`${tracks.length} ${tracks.length === 1 ? 'track' : 'tracks'}`}
+      />
 
-              {/* Track Info */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground truncate group-hover:text-green-400 transition-colors duration-300">
+      <ol className="mt-5">
+        {tracks.map((track, index) => (
+          <li key={`${track.name}-${index}`}>
+            {index > 0 ? <div aria-hidden="true" className="deck-rule" /> : null}
+            <a
+              className="group flex items-center gap-4 py-4 focus-visible:outline-none"
+              href={track.url}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {track.albumImageUrl ? (
+                <img
+                  alt=""
+                  className="size-11 shrink-0 rounded-card-sm object-cover"
+                  src={track.albumImageUrl}
+                />
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className="size-11 shrink-0 rounded-card-sm bg-deck-ink/10"
+                />
+              )}
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-deck-base font-medium text-deck-ink transition-colors group-hover:text-deck-red">
                   {track.name}
-                </h3>
-                <p className="text-sm text-foreground/60 truncate">
+                </p>
+                <p className="truncate text-deck-sm text-deck-ink/60">
                   {track.artists}
                 </p>
-                {track.playedAt && (
-                  <p className="text-xs text-foreground/40">
-                    {formatTimeAgo(track.playedAt)}
-                  </p>
-                )}
               </div>
 
-              {/* Spotify Icon */}
-              <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <RiSpotifyFill size={20} className="text-green-500" />
-              </div>
-            </div>
-          </GlassCard>
-        </motion.a>
-      ))}
-    </div>
+              <span className="deck-readout shrink-0 text-deck-sm text-deck-ink/60">
+                {track.playedAt ? formatTimeAgo(track.playedAt) : '—'}
+              </span>
+              <span className="deck-readout hidden shrink-0 text-deck-sm text-deck-ink/60 sm:block">
+                {track.duration_ms ? formatDuration(track.duration_ms) : '--:--'}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </Card>
   );
 }

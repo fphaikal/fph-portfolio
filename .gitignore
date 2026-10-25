@@ -85,6 +85,7 @@ web_modules/
 
 # Next.js build output
 .next
+.next-*
 out
 
 # Nuxt.js build / generate output
@@ -128,3 +129,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Local scratch & agent directories
+.scrape/
+.workbuddy-ai/
+PLAN-2027.md

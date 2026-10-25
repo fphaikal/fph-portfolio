@@ -1,11 +1,10 @@
 'use client';
 
-import { Modal, ModalContent, ModalBody, Image, Slider } from "@heroui/react";
-import { RiSpotifyFill } from "react-icons/ri";
+import { Modal, ModalContent, ModalBody } from "@heroui/react";
+
 import SyncedLyrics from './synced-lyrics';
 
 interface Track {
-    [x: string]: any;
     name: string;
     artists: string;
     album: string;
@@ -23,112 +22,92 @@ interface VinylModalProps {
     progress: number;
 }
 
+/** Format milliseconds as MM:SS. */
+function formatTime(milliseconds: number): string {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 export default function VinylModal({ isOpen, onOpenChange, track, progress }: VinylModalProps) {
     if (!track) return null;
 
-    const formatTime = (milliseconds: number): string => {
-        const totalSeconds = Math.floor(milliseconds / 1000);
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        const paddedMinutes = String(minutes).padStart(2, '0');
-        const paddedSeconds = String(seconds).padStart(2, '0');
-        return `${paddedMinutes}:${paddedSeconds}`;
-    };
+    const duration = track.duration_ms || 0;
+    const percent = duration > 0 ? Math.min(100, Math.max(0, (progress / duration) * 100)) : 0;
 
     return (
         <Modal
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            size="xl"
             backdrop="blur"
             classNames={{
                 base: "bg-transparent shadow-none outline-none",
-                closeButton: "text-white hover:bg-white/10 active:bg-white/20 z-50",
+                closeButton: "z-50 rounded-full text-deck-ink/60 hover:bg-deck-ink/10 active:bg-deck-ink/15",
                 body: "outline-none",
                 wrapper: "outline-none",
             }}
+            isOpen={isOpen}
+            size="xl"
+            onOpenChange={onOpenChange}
         >
             <ModalContent className="outline-none">
-                {(onClose) => (
-                    <ModalBody className="p-0 overflow-hidden rounded-3xl select-none outline-none">
-                        {/* Container with blurred background and glass border */}
-                        <div
-                            className="relative min-h-[500px] flex flex-col outline-none rounded-3xl border border-white/20 overflow-hidden"
-                            style={{
-                                boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1), inset 0 -1px 1px rgba(0,0,0,0.1)"
-                            }}
-                        >
-                            {/* Blurred Album Art Background */}
-                            <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl">
+                {() => (
+                    <ModalBody className="select-none overflow-hidden rounded-card p-0 outline-none">
+                        <div className="card-face relative flex min-h-[500px] flex-col">
+                            {/* Kepala — lagu dan status pemutaran */}
+                            <div className="flex items-center gap-4 border-b border-deck-ink/10 p-5">
                                 <img
-                                    alt="Background"
+                                    alt={`${track.name} album cover`}
                                     src={track.albumImageUrl}
-                                    className="w-full h-full object-cover scale-125 blur-2xl"
+                                    className="size-16 shrink-0 rounded-card-sm object-cover"
                                 />
-                                {/* Dark overlay */}
-                                <div className="absolute inset-0 bg-black/60" />
+                                <div className="min-w-0 flex-1">
+                                    {track.is_playing ? (
+                                        <span className="deck-readout inline-flex items-center gap-2 text-deck-sm text-deck-ink/60">
+                                            <span aria-hidden="true" className="size-1.5 rounded-full bg-deck-red" />
+                                            Streaming
+                                        </span>
+                                    ) : (
+                                        <span className="deck-readout text-deck-sm text-deck-ink/60">
+                                            Paused
+                                        </span>
+                                    )}
+                                    <h2 className="mt-1 truncate text-deck-lg font-semibold text-deck-ink">
+                                        {track.name}
+                                    </h2>
+                                    <p className="truncate text-deck-sm text-deck-ink/60">
+                                        {track.artists}
+                                    </p>
+                                </div>
                             </div>
 
-                            {/* Top-left highlight for 3D glass effect */}
-                            <div
-                                className="absolute inset-0 pointer-events-none rounded-3xl z-[1]"
-                                style={{
-                                    background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 30%, transparent 100%)",
-                                }}
-                            />
-
-                            {/* Content */}
-                            <div className="relative z-10 flex flex-col min-h-[500px] p-6">
-                                {/* Top: Album art + Title */}
-                                <div className="flex items-center gap-4 mb-4">
-                                    <Image
-                                        alt="Album cover"
-                                        src={track.albumImageUrl}
-                                        className="w-16 h-16 rounded-lg object-cover shadow-lg"
-                                        removeWrapper
+                            {/* Tengah — lirik tersinkron */}
+                            <div className="flex flex-1 items-center justify-center p-5">
+                                <div className="h-full w-full">
+                                    <SyncedLyrics
+                                        artist={track.artists}
+                                        track={track.name}
+                                        album={track.album}
+                                        progress={progress}
+                                        isPlaying={track.is_playing}
                                     />
-                                    <div className="flex-1 min-w-0">
-                                        <div className={`flex gap-2 items-center mb-1 ${track.is_playing ? "text-green-400" : "text-white/70"}`}>
-                                            <RiSpotifyFill size={18} />
-                                            <span className="text-sm font-medium">{track.is_playing ? 'Now Playing' : 'Paused'}</span>
-                                        </div>
-                                        <h2 className="text-white text-lg font-bold leading-tight truncate">{track.name}</h2>
-                                        <p className="text-white/70 text-sm truncate">{track.artists}</p>
-                                    </div>
                                 </div>
+                            </div>
 
-                                {/* Center: Lyrics - takes remaining space */}
-                                <div className="flex-1 flex items-center justify-center min-h-[280px]">
-                                    <div className="w-full h-full">
-                                        <SyncedLyrics
-                                            artist={track.artists}
-                                            track={track.name}
-                                            album={track.album}
-                                            progress={progress}
-                                            isPlaying={track.is_playing}
+                            {/* Bawah — bilah kemajuan tipis */}
+                            <div className="mt-auto border-t border-deck-ink/10 p-5">
+                                <div className="flex items-center gap-3">
+                                    <span className="deck-readout shrink-0 text-deck-xs text-deck-ink/60">
+                                        {formatTime(progress)}
+                                    </span>
+                                    <div className="h-[3px] flex-1 overflow-hidden rounded-pip bg-deck-ink/10">
+                                        <div
+                                            className="h-full rounded-pip bg-deck-red"
+                                            style={{ width: `${percent}%` }}
                                         />
                                     </div>
-                                </div>
-
-                                {/* Bottom: Progress bar - always at bottom */}
-                                <div className="mt-auto pt-4">
-                                    <Slider
-                                        aria-label="Music progress"
-                                        classNames={{
-                                            track: "bg-white/20",
-                                            filler: "bg-white",
-                                            thumb: "w-3 h-3 after:w-3 after:h-3 after:bg-white",
-                                        }}
-                                        color="foreground"
-                                        value={progress}
-                                        maxValue={track.duration_ms}
-                                        size="sm"
-                                        isDisabled
-                                    />
-                                    <div className="flex justify-between text-xs text-white/60 mt-1">
-                                        <span>{formatTime(progress)}</span>
-                                        <span>{formatTime(track.duration_ms)}</span>
-                                    </div>
+                                    <span className="deck-readout shrink-0 text-deck-xs text-deck-ink/60">
+                                        {formatTime(duration)}
+                                    </span>
                                 </div>
                             </div>
                         </div>

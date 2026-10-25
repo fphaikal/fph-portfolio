@@ -44,6 +44,18 @@ export default function StructuredData() {
           "@type": "Organization",
           name: "PT Astra Graphia Tbk",
         },
+        alumniOf: [
+          {
+            "@type": "CollegeOrUniversity",
+            name: "Universitas Ahmad Dahlan",
+            sameAs: "https://uad.ac.id",
+          },
+          {
+            "@type": "EducationalOrganization",
+            name: "SMK SMTI Yogyakarta",
+            sameAs: "https://smtijogja.sch.id",
+          },
+        ],
         knowsAbout: [
           "IT support",
           "Full-stack web development",

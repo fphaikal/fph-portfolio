@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { cache } from "react";
+
 import MarkdownRenderer from "@/components/blog/markdown-renderer";
 import ViewTracker from "@/components/blog/view-tracker";
-import Link from "next/link";
-import { ArrowLeft, Calendar, User } from "lucide-react";
-import { notFound } from "next/navigation";
+import { Card } from "@/components/deck/card";
 import { siteConfig } from "@/config/site";
 
 interface BlogPost {
@@ -24,13 +25,27 @@ const getPost = cache(async (slug: string): Promise<BlogPost | null> => {
     apiUrl = `https://${apiUrl}`;
   }
 
-  const res = await fetch(`${apiUrl}/api/blog/${slug}`, { cache: "no-store" });
+  const res = await fetch(`${apiUrl}/api/blog/${slug}`, { next: { revalidate: 300 } });
   if (res.status === 404) return null;
   if (!res.ok) {
     throw new Error("Failed to fetch post");
   }
   return res.json();
 });
+
+function formatDate(iso: string): string {
+  const parsed = new Date(iso);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "Undated";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(parsed);
+}
 
 export async function generateMetadata({
   params,
@@ -71,6 +86,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound();
   }
 
+  const date = formatDate(post.created_at);
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -91,66 +108,76 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   };
 
   return (
-    <div className="w-full pb-16">
+    <div className="mx-auto w-full max-w-3xl px-6 pb-24 pt-28 sm:pt-36">
       <script
-        type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(articleSchema).replace(/</g, "\\u003c"),
         }}
+        type="application/ld+json"
       />
       <ViewTracker slug={slug} />
+
       <Link
+        className="deck-link group inline-flex items-center gap-1 font-mono text-xs uppercase tracking-[0.08em]"
         href="/blog"
-        className="inline-flex items-center gap-2 text-default-500 hover:text-primary transition-colors mb-8 group"
       >
-        <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-        Back to Blog
+        <span
+          aria-hidden="true"
+          className="transition-transform duration-300 ease-deck group-hover:-translate-x-0.5"
+        >
+          ‹
+        </span>
+        BACK TO NOTES
       </Link>
 
-      <article>
-        <header className="mb-10 text-center">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-black dark:from-white to-black/50 dark:to-white/50 tracking-tight">
+      <Card
+        indexSize="md"
+        label={post.title}
+        rank="01"
+        suit="spade"
+        className="mt-8"
+        contentClassName="p-8 pt-14 sm:p-12 sm:pt-16"
+      >
+        <header>
+          <h1 className="text-balance font-sans text-3xl font-medium tracking-[-0.03em] text-white sm:text-5xl">
             {post.title}
           </h1>
-
-          <div className="flex items-center justify-center gap-6 text-default-500 mb-8">
-            <Link className="flex items-center gap-2 hover:text-primary" href="/" rel="author">
-              <User size={18} />
-              <span>{siteConfig.fullName}</span>
-            </Link>
-            <div className="flex items-center gap-2">
-              <Calendar size={18} />
-              <time dateTime={post.created_at}>
-                {new Date(post.created_at).toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </time>
-            </div>
-          </div>
-
-          {post.cover_image && (
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl border border-default-200/50">
-              <img
-                src={post.cover_image}
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            </div>
-          )}
+          <p className="deck-readout mt-5 text-xs uppercase tracking-[0.08em] text-white/55">
+            {date}
+            <span aria-hidden="true" className="px-2">
+              ·
+            </span>
+            REF {post.slug || slug}
+          </p>
         </header>
 
-        <section className="bg-background/60 backdrop-blur-sm rounded-2xl p-0 md:p-4">
-          <MarkdownRenderer content={post.content} />
-        </section>
-      </article>
+        {post.cover_image ? (
+          <img
+            alt={post.title}
+            className="measure-deck mx-auto mt-10 w-full rounded-card border border-white/10 object-cover"
+            decoding="async"
+            src={post.cover_image}
+          />
+        ) : null}
 
-      <div className="mt-16 pt-8 border-t border-default-200">
-        <p className="text-center text-default-500 italic">
-          Thanks for reading!
-        </p>
+        <div className="measure-deck mx-auto mt-10">
+          <MarkdownRenderer content={post.content} />
+        </div>
+      </Card>
+
+      <div className="mt-12">
+        <Link
+          className="deck-link group inline-flex items-center gap-1 font-mono text-xs uppercase tracking-[0.08em]"
+          href="/blog"
+        >
+          MORE NOTES
+          <span
+            aria-hidden="true"
+            className="transition-transform duration-300 ease-deck group-hover:translate-x-0.5"
+          >
+            ›
+          </span>
+        </Link>
       </div>
     </div>
   );

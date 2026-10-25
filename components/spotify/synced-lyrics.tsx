@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
+
 import { parseLRC, findCurrentLineIndex } from '@/lib/lrc-parser';
-import { RiMusicFill } from 'react-icons/ri';
+import { cn } from '@/lib/utils';
 
 interface SyncedLyricsProps {
   artist: string;
@@ -19,6 +20,25 @@ interface LyricsData {
   instrumental: boolean;
 }
 
+/** Format milliseconds as MM:SS for lyric timestamps. */
+function formatTimestamp(milliseconds: number): string {
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+/** Neutral status message for states without lyrics. */
+function LyricsMessage({ children }: { children: string }) {
+  return (
+    <div className="flex items-center justify-center py-8">
+      <span className="deck-readout text-deck-sm font-medium text-deck-ink/60">
+        {children}
+      </span>
+    </div>
+  );
+}
+
 export default function SyncedLyrics({
   artist,
   track,
@@ -29,7 +49,10 @@ export default function SyncedLyrics({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Cache to track last fetched song - prevents re-fetching same lyrics
+  // Hormati preferensi gerak minimal: tampilkan isi langsung, tanpa animasi.
+  const reduceMotion = useReducedMotion();
+
+  // Cache untuk melacak lagu terakhir yang diambil — mencegah pengambilan ulang.
   const lastFetchedTrack = useRef<string | null>(null);
 
   // Parse lyrics once when data changes
@@ -43,7 +66,7 @@ export default function SyncedLyrics({
     return findCurrentLineIndex(parsedLyrics, progress);
   }, [parsedLyrics, progress]);
 
-  // Get visible lyrics (3 lines: previous, current, next)
+  // Get visible lyrics (previous, current, next)
   const visibleLyrics = useMemo(() => {
     if (parsedLyrics.length === 0) return [];
 
@@ -91,7 +114,7 @@ export default function SyncedLyrics({
         } else {
           setError(data.error || 'Lyrics not found');
         }
-      } catch (err) {
+      } catch {
         setError('Failed to fetch lyrics');
       } finally {
         setLoading(false);
@@ -102,48 +125,28 @@ export default function SyncedLyrics({
   }, [artist, track, album]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="flex flex-col items-center gap-3">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-          >
-            <RiMusicFill size={24} className="text-white/40" />
-          </motion.div>
-          <p className="text-sm text-white/40">Loading lyrics...</p>
-        </div>
-      </div>
-    );
+    return <LyricsMessage>Loading lyrics…</LyricsMessage>;
   }
 
   if (error || !lyricsData) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <p className="text-sm text-white/40">{error || 'No lyrics available'}</p>
-      </div>
-    );
+    return <LyricsMessage>{error || 'No lyrics available'}</LyricsMessage>;
   }
 
   if (lyricsData.instrumental) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="flex flex-col items-center gap-2">
-          <RiMusicFill size={24} className="text-white/40" />
-          <p className="text-sm text-white/40">Instrumental</p>
-        </div>
-      </div>
-    );
+    return <LyricsMessage>Instrumental</LyricsMessage>;
   }
 
   // No synced lyrics, show plain lyrics (scrollable)
   if (!lyricsData.syncedLyrics && lyricsData.plainLyrics) {
     const plainLines = lyricsData.plainLyrics.split('\n');
     return (
-      <div className="h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-        <div className="space-y-3 py-4 px-2">
+      <div className="scrollbar-none h-[280px] overflow-y-auto">
+        <div className="flex flex-col gap-3 py-4">
           {plainLines.map((line, index) => (
-            <p key={index} className="text-sm text-white/70 text-center leading-relaxed">
+            <p
+              key={index}
+              className="font-sans text-deck-base text-deck-ink/70"
+            >
               {line || '\u00A0'}
             </p>
           ))}
@@ -152,55 +155,66 @@ export default function SyncedLyrics({
     );
   }
 
-  // Synced lyrics with smooth animation
+  // Synced lyrics — baris aktif memakai tinta merah kartu.
   return (
-    <div className="overflow-hidden h-[250px]">
-      <div className="flex flex-col items-center justify-center h-full gap-3">
-        {visibleLyrics.map((line) => {
-          const isCurrent = line.position === 0;
-          const isPast = line.position < 0;
+    <div className="flex h-[250px] flex-col justify-center gap-2 overflow-hidden">
+      {visibleLyrics.map((line) => {
+        const isCurrent = line.position === 0;
+        const isPast = line.position < 0;
 
-          return (
-            <motion.div
-              key={line.index}
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{
-                opacity: isCurrent ? 1 : isPast ? 0.4 : 0.5,
-                scale: isCurrent ? 1 : 0.9,
-                y: 0,
-              }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{
-                type: 'spring',
-                stiffness: 200,
-                damping: 25,
-              }}
-              className={`
-                text-center w-full px-4 leading-relaxed
-                ${isCurrent
-                  ? 'text-white font-bold text-4xl'
-                  : 'text-white/50 text-base font-normal'
-                }
-              `}
+        return (
+          <motion.div
+            key={line.index}
+            layout={!reduceMotion}
+            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+            animate={{
+              opacity: isCurrent ? 1 : isPast ? 0.35 : 0.45,
+              y: 0,
+            }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : {
+                    type: 'spring',
+                    stiffness: 200,
+                    damping: 25,
+                  }
+            }
+            className={cn(
+              'flex items-baseline gap-3 border-l-2 py-1 pl-4',
+              isCurrent ? 'border-deck-red' : 'border-transparent',
+            )}
+          >
+            <span className="deck-readout shrink-0 text-deck-xs text-deck-ink/50">
+              {formatTimestamp(line.time)}
+            </span>
+            <span
+              className={cn(
+                'font-sans text-deck-base',
+                isCurrent
+                  ? 'font-semibold text-deck-red'
+                  : 'text-deck-ink/60',
+              )}
             >
               {line.text}
-            </motion.div>
-          );
-        })}
-
-        {/* Show waiting message when no current line */}
-        {currentIndex < 0 && parsedLyrics.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
-            className="text-lg text-white/40 text-center"
-          >
-            ♪ ♪ ♪
+            </span>
           </motion.div>
-        )}
-      </div>
+        );
+      })}
+
+      {/* Line not started yet */}
+      {currentIndex < 0 && parsedLyrics.length > 0 && (
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 0.6 }}
+          className="border-l-2 border-transparent pl-4"
+        >
+          <span className="text-deck-sm font-medium text-deck-ink/60">
+            Waiting for the first line…
+          </span>
+        </motion.div>
+      )}
     </div>
   );
 }
-

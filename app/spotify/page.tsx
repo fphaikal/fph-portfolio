@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import SpotifyNowPlaying from "@/components/spotify/now-playing";
 import SpotifyRecentlyPlayed from "@/components/spotify/recently-played";
-import { RiSpotifyFill } from "react-icons/ri";
+import SpotifyTopTracks from "@/components/spotify/top-tracks";
 import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -19,30 +19,27 @@ export const metadata: Metadata = {
 
 export default function SpotifyPage() {
   return (
-    <div className="flex flex-col w-full gap-8 pb-16">
-      {/* Header Section */}
-      <div className="flex items-center gap-4">
-        <div className="p-3 bg-green-500/20 rounded-2xl">
-          <RiSpotifyFill size={32} className="text-green-500" />
+    <div className="mx-auto w-full max-w-3xl px-6 pb-24 pt-28 sm:pt-36">
+      <header className="mx-auto flex max-w-2xl flex-col items-center text-center">
+        <div className="lumina-pill">
+          <span aria-hidden="true" className="inline-block h-[5px] w-[5px] bg-white" />
+          <span>AUDIO TELEMETRY</span>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold text-spotify-gradient">Spotify</h1>
-          <p className="text-foreground/60 text-sm">My music activity</p>
-        </div>
-      </div>
+        <h1 className="mt-6 text-balance font-sans text-4xl font-light tracking-[-0.035em] text-white sm:text-6xl">
+          What I&apos;m{" "}
+          <span className="font-serif italic font-normal text-[#a8ceff]">listening to</span>
+        </h1>
+        <p className="mx-auto mt-5 max-w-xl font-sans text-base text-[#8d96aa]">
+          A live look at the music on my Spotify — what&apos;s playing right now and what I&apos;ve
+          had on repeat lately.
+        </p>
+      </header>
 
-      {/* Now Playing - Hero Section */}
-      <section className="w-full">
+      <div className="mt-12 flex flex-col gap-8 sm:mt-16">
         <SpotifyNowPlaying />
-      </section>
-
-      {/* Recently Played Section */}
-      <section className="w-full">
-        <div className="flex items-center gap-2 mb-4">
-          <h2 className="text-xl font-semibold">Recently Played</h2>
-        </div>
         <SpotifyRecentlyPlayed />
-      </section>
+        <SpotifyTopTracks />
+      </div>
     </div>
   );
 }

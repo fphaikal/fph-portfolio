@@ -1,193 +1,202 @@
 'use client';
 
-import { Card, CardBody, Skeleton, Slider, useDisclosure } from "@heroui/react";
-import GlassCard from "@/components/ui/glass-card";
-import { RiSpotifyFill } from 'react-icons/ri';
-import VinylModal from './vinyl-modal';
-import { useSpotify } from "@/context/spotify-context";
-import { motion } from 'framer-motion';
+import { useDisclosure } from "@heroui/react";
 
-// Music Wave Component
-const MusicWave = () => (
-  <div className="music-wave">
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-);
+import { Card } from "@/components/deck/card";
+import { useSpotify } from "@/context/spotify-context";
+import { cn } from "@/lib/utils";
+import type { Track } from "@/types";
+
+import VinylModal from './vinyl-modal';
+
+/** Format milliseconds as MM:SS. */
+function formatTime(milliseconds: number): string {
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+/** Progress percentage, clamped to 0–100. */
+function progressPercent(progress: number, duration: number): number {
+  if (duration <= 0) return 0;
+  return Math.min(100, Math.max(0, (progress / duration) * 100));
+}
+
+interface ActiveTrackProps {
+  track: Track;
+  progress: number;
+  onOpen: () => void;
+}
+
+/** Lagu yang sedang diputar. */
+function ActiveTrack({ track, progress, onOpen }: ActiveTrackProps) {
+  const duration = track.duration_ms || 0;
+  const percent = progressPercent(progress, duration);
+
+  return (
+    <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
+      <button
+        aria-label={`Open details for ${track.name}`}
+        className="group shrink-0 rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deck-red"
+        type="button"
+        onClick={onOpen}
+      >
+        <img
+          alt={`${track.name} album cover`}
+          className="size-40 rounded-card object-cover sm:size-48"
+          src={track.albumImageUrl || '/placeholder-album.png'}
+        />
+      </button>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-5">
+        <div className="min-w-0">
+          <h2 className="truncate text-deck-xl font-semibold text-deck-ink">
+            {track.name}
+          </h2>
+          <p className="mt-1 truncate text-deck-base text-deck-ink/65">
+            {track.artists}
+            <span aria-hidden="true" className="px-1.5 text-deck-ink/40">
+              ·
+            </span>
+            {track.album}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="deck-readout shrink-0 text-deck-xs text-deck-ink/60">
+            {formatTime(progress)}
+          </span>
+          <div className="h-[3px] flex-1 overflow-hidden rounded-pip bg-deck-ink/10">
+            <div
+              className="h-full rounded-pip bg-deck-red"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+          <span className="deck-readout shrink-0 text-deck-xs text-deck-ink/60">
+            {formatTime(duration)}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface IdleTrackProps {
+  lastKnown: Track | null;
+  onOpen: () => void;
+}
+
+/** Keadaan menganggur — tidak ada yang diputar. */
+function IdleTrack({ lastKnown, onOpen }: IdleTrackProps) {
+  if (!lastKnown) {
+    return (
+      <p className="deck-readout mt-6 text-deck-base text-deck-ink/70">
+        Nothing is on the table right now.
+      </p>
+    );
+  }
+
+  return (
+    <button
+      className="group mt-6 flex w-full items-center gap-4 rounded-card text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deck-red"
+      type="button"
+      onClick={onOpen}
+    >
+      <img
+        alt={`${lastKnown.name} album cover`}
+        className="size-12 shrink-0 rounded-card-sm object-cover"
+        src={lastKnown.albumImageUrl || '/placeholder-album.png'}
+      />
+      <div className="min-w-0 flex-1">
+        <span className="deck-eyebrow block">Last played</span>
+        <p className="mt-1 truncate text-deck-base font-medium text-deck-ink">
+          {lastKnown.name}
+        </p>
+        <p className="truncate text-deck-sm text-deck-ink/60">
+          {lastKnown.artists}
+        </p>
+      </div>
+      {lastKnown.duration_ms ? (
+        <span className="deck-readout shrink-0 text-deck-xs text-deck-ink/60">
+          {formatTime(lastKnown.duration_ms)}
+        </span>
+      ) : null}
+    </button>
+  );
+}
 
 export default function SpotifyNowPlaying({ className }: { className?: string }) {
   const { track, recentTrack, progress, loading, error, isPlaying } = useSpotify();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const formatTime = (milliseconds: number): string => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    const paddedMinutes = String(minutes).padStart(2, '0');
-    const paddedSeconds = String(seconds).padStart(2, '0');
-    return `${paddedMinutes}:${paddedSeconds}`;
-  };
-
-  // Show skeleton only on initial load when we have no data at all
+  // Skeleton hanya saat pemuatan awal tanpa data sama sekali.
   const showSkeleton = loading && !track && !recentTrack;
+  const lastKnown = track ?? recentTrack;
+  const isLive = isPlaying && Boolean(track);
 
-  // Determine which track to display - either currently playing or most recent
-  const displayTrack = track || recentTrack;
-
-  if (showSkeleton) return (
-    <div className="relative w-full h-[300px] rounded-3xl overflow-hidden">
-      <Skeleton className="w-full h-full rounded-3xl" />
+  const header = (
+    <div className="flex items-center justify-between gap-3">
+      <span className="deck-eyebrow">Now playing</span>
+      {isLive ? (
+        <span className="deck-readout inline-flex items-center gap-2 text-deck-xs text-deck-ink/60">
+          <span aria-hidden="true" className="size-1.5 rounded-full bg-deck-red" />
+          Streaming
+        </span>
+      ) : (
+        <span className="deck-readout text-deck-xs text-deck-ink/60">Idle</span>
+      )}
     </div>
   );
 
-  if (error) return (
-    <GlassCard intensity="medium" className="w-full p-8">
-      <div className="flex items-center justify-center gap-3">
-        <RiSpotifyFill size={24} className="text-red-500" />
-        <p className="text-red-500">Failed to load Spotify data</p>
-      </div>
-    </GlassCard>
-  );
-
-  // No track data at all
-  if (!displayTrack) return (
-    <GlassCard intensity="medium" className="w-full p-12">
-      <div className="flex flex-col items-center justify-center gap-4">
-        <div className="p-4 bg-foreground/5 rounded-full">
-          <RiSpotifyFill size={48} className="text-foreground/30" />
+  if (showSkeleton) {
+    return (
+      <Card className={cn(className)} contentClassName="p-6 sm:p-8">
+        {header}
+        <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-center">
+          <div className="size-40 shrink-0 animate-pulse rounded-card bg-deck-ink/10 sm:size-48" />
+          <div className="flex w-full flex-col gap-3">
+            <div className="h-3 w-24 animate-pulse rounded-pip bg-deck-ink/10" />
+            <div className="h-6 w-3/4 animate-pulse rounded-pip bg-deck-ink/10" />
+            <div className="h-4 w-1/2 animate-pulse rounded-pip bg-deck-ink/10" />
+            <div className="mt-4 h-[3px] w-full animate-pulse rounded-pip bg-deck-ink/10" />
+          </div>
         </div>
-        <div className="text-center">
-          <h3 className="text-lg font-medium text-foreground/70">No recent tracks</h3>
-          <p className="text-sm text-foreground/50">Start listening on Spotify</p>
-        </div>
-      </div>
-    </GlassCard>
-  );
+      </Card>
+    );
+  }
 
-  // Check if currently playing a track
-  const showIdleState = !isPlaying && !track;
+  if (error) {
+    return (
+      <Card className={cn(className)} contentClassName="p-6 sm:p-8">
+        <div className="flex items-center justify-between gap-3">
+          <span className="deck-eyebrow">Now playing</span>
+          <span className="deck-readout text-deck-xs text-deck-ink/60">Unavailable</span>
+        </div>
+        <p className="mt-6 text-deck-base text-deck-ink/70">
+          We couldn&apos;t reach Spotify right now. Please check back in a
+          moment.
+        </p>
+      </Card>
+    );
+  }
 
   return (
     <>
-      {/* Hero Now Playing Card */}
-      <motion.div
-        onClick={displayTrack ? onOpen : undefined}
-        className={`cursor-pointer group ${className}`}
-        whileHover={{ scale: 1.01 }}
-        transition={{ duration: 0.2 }}
-      >
-        <div className="relative w-full rounded-3xl overflow-hidden hover-glow">
-          {/* Blurred Album Art Background */}
-          <div className="absolute inset-0 z-0">
-            <img
-              alt="Background"
-              src={displayTrack?.albumImageUrl || '/placeholder-album.png'}
-              className="w-full h-full object-cover scale-125 blur-2xl opacity-60"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" />
-          </div>
-
-          {/* Glass Overlay */}
-          <div className="relative z-10 backdrop-blur-sm bg-white/5 border border-white/10 rounded-3xl">
-            <div className="p-6 md:p-8">
-              {showIdleState ? (
-                // Idle state - not listening to anything
-                <div className="flex flex-col items-center justify-center py-12 gap-4">
-                  <div className="relative">
-                    <RiSpotifyFill size={64} className="text-white/20" />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-xl font-medium text-white/70">Not listening right now</h3>
-                    <p className="text-sm text-white/50 mt-1">Spotify is idle</p>
-                  </div>
-                </div>
-              ) : (
-                // Playing or last played state
-                <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
-                  {/* Album Art */}
-                  <motion.div
-                    className="relative shrink-0"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <img
-                      alt="Album cover"
-                      className="w-48 h-48 md:w-56 md:h-56 object-cover rounded-2xl shadow-2xl"
-                      src={displayTrack?.albumImageUrl || '/placeholder-album.png'}
-                    />
-                    {isPlaying && (
-                      <div className="absolute -bottom-2 -right-2 p-2 bg-green-500 rounded-full shadow-lg spotify-glow">
-                        <RiSpotifyFill size={20} className="text-white" />
-                      </div>
-                    )}
-                  </motion.div>
-
-                  {/* Track Info */}
-                  <div className="flex-1 flex flex-col justify-center text-center md:text-left min-w-0">
-                    {/* Status Badge */}
-                    <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
-                      {isPlaying ? (
-                        <>
-                          <MusicWave />
-                          <span className="text-green-400 text-sm font-medium uppercase tracking-wider">Now Playing</span>
-                        </>
-                      ) : (
-                        <>
-                          <RiSpotifyFill size={16} className="text-white/60" />
-                          <span className="text-white/60 text-sm font-medium uppercase tracking-wider">Last Played</span>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Song Title */}
-                    <h1 className="text-2xl md:text-3xl font-bold text-white truncate mb-2">
-                      {displayTrack?.name}
-                    </h1>
-
-                    {/* Artist & Album */}
-                    <p className="text-white/70 text-lg truncate mb-6">
-                      {displayTrack?.artists}
-                      <span className="mx-2 text-white/30">•</span>
-                      <span className="text-white/50">{displayTrack?.album}</span>
-                    </p>
-
-                    {/* Progress Bar */}
-                    <div className="w-full">
-                      <Slider
-                        aria-label="Music progress"
-                        classNames={{
-                          base: "w-full",
-                          track: "bg-white/20 h-1",
-                          filler: "bg-gradient-to-r from-green-400 to-green-500 h-1",
-                          thumb: "w-3 h-3 after:w-3 after:h-3 after:bg-white opacity-0 group-hover:opacity-100 transition-opacity",
-                        }}
-                        color="success"
-                        value={isPlaying ? progress : 0}
-                        maxValue={displayTrack?.duration_ms || 100}
-                        size="sm"
-                        isDisabled
-                      />
-                      <div className="flex justify-between mt-1">
-                        <span className="text-xs text-white/50">{isPlaying ? formatTime(progress) : '00:00'}</span>
-                        <span className="text-xs text-white/50">{formatTime(displayTrack?.duration_ms || 0)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </motion.div>
+      <Card className={cn(className)} contentClassName="p-6 sm:p-8">
+        {header}
+        {isLive && track ? (
+          <ActiveTrack onOpen={onOpen} progress={progress} track={track} />
+        ) : (
+          <IdleTrack lastKnown={lastKnown} onOpen={onOpen} />
+        )}
+      </Card>
 
       <VinylModal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        track={displayTrack}
         progress={progress}
+        track={lastKnown}
       />
     </>
   );

@@ -1,14 +1,28 @@
-import { Fira_Code as FontMono, Inter as FontSans } from "next/font/google";
+import {
+  Instrument_Serif as FontSerif,
+  Inter as FontSans,
+  JetBrains_Mono as FontMono,
+} from "next/font/google";
 import localFont from "next/font/local";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+export const fontSerif = FontSerif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+  display: "swap",
 });
 
 export const fontMono = FontMono({
   subsets: ["latin"],
   variable: "--font-mono",
+  display: "swap",
 });
 
 export const ibrand = localFont({

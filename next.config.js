@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  // Bisa diarahkan ke direktori lain untuk build verifikasi:
+  //   NEXT_DIST_DIR=.next-build npx next build
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   async redirects() {
     return [
       {

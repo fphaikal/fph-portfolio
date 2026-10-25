@@ -2,121 +2,546 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  background-color: black;
-}
-
-/* Override for light mode */
-html.light {
-  background-color: white;
-}
+/* =====================================================================
+   LUMINA DESIGN SYSTEM
+   Deep obsidian-navy architecture, luminous sky-blue horizon, halftone
+   arrow matrix, editorial italic serif + geometric sans + technical mono,
+   3D squircle hardware nodes, and 1px architectural grid lines.
+   ===================================================================== */
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --radius: 0.75rem;
+    --background: 225 43% 4%;       /* #06080f deep obsidian navy */
+    --foreground: 214 32% 96%;      /* #f0f4fa crisp ice white */
+    --card: 224 40% 7%;             /* #0b0f19 dark architectural panel */
+    --card-foreground: 214 32% 96%;
+    --popover: 224 42% 6%;
+    --popover-foreground: 214 32% 96%;
+    --primary: 215 90% 62%;         /* #478ff5 luminous cobalt sky */
+    --primary-foreground: 225 45% 5%;
+    --secondary: 222 32% 11%;
+    --secondary-foreground: 214 32% 96%;
+    --muted: 222 28% 12%;
+    --muted-foreground: 218 15% 56%; /* #7d869c muted slate */
+    --accent: 216 45% 16%;
+    --accent-foreground: 214 32% 96%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 25% 15%;
+    --input: 220 25% 15%;
+    --ring: 214 90% 65%;
+
+    /* Semantic aliases for backward compatibility across routes */
+    --deck-red: 214 92% 64%;        /* Electric sky blue */
+    --deck-red-bright: 208 100% 76%;/* Luminous ice blue */
+    --deck-red-deep: 218 68% 28%;   /* Deep sapphire */
+    --deck-ink: 214 32% 96%;        /* Crisp white text on dark surfaces */
+    --deck-gold: 212 80% 72%;       /* Ice-blue rim highlight */
+    --deck-ivory: 224 40% 7%;       /* Dark obsidian card surface */
+    --deck-ivory-2: 224 36% 10%;
+    --deck-felt: 225 43% 5%;
+
+    --shadow-card: 0 1px 0 inset rgba(255, 255, 255, 0.08),
+      0 20px 50px -20px rgba(0, 0, 0, 0.85),
+      0 8px 20px -8px rgba(0, 0, 0, 0.65);
+    --shadow-card-lift: 0 1px 0 inset rgba(255, 255, 255, 0.16),
+      0 28px 64px -20px rgba(15, 55, 130, 0.45),
+      0 12px 28px -10px rgba(0, 0, 0, 0.8);
+
+    --radius: 16px;
+  }
+
+  /* Keep dark Lumina aesthetic consistent across modes */
+  .light {
+    --background: 225 43% 4%;
+    --foreground: 214 32% 96%;
+    --card: 224 40% 7%;
+    --card-foreground: 214 32% 96%;
+    --popover: 224 42% 6%;
+    --popover-foreground: 214 32% 96%;
+    --primary: 215 90% 62%;
+    --primary-foreground: 225 45% 5%;
+    --secondary: 222 32% 11%;
+    --secondary-foreground: 214 32% 96%;
+    --muted: 222 28% 12%;
+    --muted-foreground: 218 15% 56%;
+    --accent: 216 45% 16%;
+    --accent-foreground: 214 32% 96%;
+    --border: 220 25% 15%;
+    --input: 220 25% 15%;
+    --ring: 214 90% 65%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    background-color: #06080f;
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
+    font-size: 16px;
+    line-height: 1.55;
+    background-color: #06080f;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+  }
+
+  ::selection {
+    background-color: rgba(96, 165, 250, 0.28);
+    color: #ffffff;
+  }
+
+  :target,
+  section[id] {
+    scroll-margin-top: 4.5rem;
   }
 }
 
-.glass-card {
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+@layer components {
+  /* ===================== LUMINA ATMOSPHERIC BACKGROUNDS ===================== */
+
+  /* Hero sky-to-horizon gradient matching the reference image */
+  .lumina-hero-bg {
+    background:
+      radial-gradient(130% 42% at 50% 102%, #eff7ff 0%, #bedbff 20%, #6ea4f8 42%, rgba(56, 108, 204, 0) 72%),
+      linear-gradient(
+        180deg,
+        #050811 0%,
+        #081021 18%,
+        #102042 40%,
+        #1e3d78 62%,
+        #3f6ec2 80%,
+        #84b4f9 93%,
+        #d6e9ff 100%
+      );
+  }
+
+  /* Bridge section below the horizon line */
+  .lumina-bridge-bg {
+    background:
+      radial-gradient(95% 58% at 50% -4%, rgba(62, 120, 218, 0.52) 0%, rgba(28, 60, 120, 0.34) 44%, rgba(8, 13, 24, 0) 78%),
+      linear-gradient(
+        180deg,
+        #193567 0%,
+        #112347 26%,
+        #091122 54%,
+        #060911 82%,
+        #06080f 100%
+      );
+  }
+
+  /* Fine architectural dot matrix for technical panels */
+  .lumina-dot-grid {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+
+  /* Fine dense dot matrix on the flanks of the bridge section */
+  .lumina-micro-matrix {
+    background-image: radial-gradient(rgba(148, 192, 255, 0.14) 1px, transparent 1px);
+    background-size: 8px 8px;
+  }
+
+  /* ===================== LUMINA BADGES & CHAMFERED TABS ===================== */
+
+  /* Hero pill badge: ▪ NEW: AI-POWERED AUTOMATION PLATFORM */
+  .lumina-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.42rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(24, 43, 82, 0.58);
+    border: 1px solid rgba(135, 180, 255, 0.28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 4px 20px rgba(5, 10, 25, 0.35);
+    backdrop-filter: blur(12px);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(235, 244, 255, 0.92);
+  }
+
+  /* Chamfered corner tab attached to the top-left of architectural grid cells: ▪ WHAT WE DO */
+  .lumina-section-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem 0.45rem 0.75rem;
+    background: #151822;
+    border-right: 1px solid rgba(255, 255, 255, 0.09);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    border-bottom-right-radius: 8px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: rgba(226, 234, 248, 0.88);
+    line-height: 1;
+  }
+
+  /* ===================== 3D GLOSSY SQUIRCLE HARDWARE CHIP ===================== */
+
+  .lumina-squircle {
+    position: relative;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #2b303c 0%, #151820 48%, #0b0d12 100%);
+    padding: 5px;
+    box-shadow:
+      0 24px 48px -8px rgba(0, 0, 0, 0.88),
+      0 6px 16px -2px rgba(0, 0, 0, 0.75),
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.28),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .lumina-squircle__well {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+    background:
+      radial-gradient(85% 75% at 50% 18%, rgba(68, 78, 98, 0.48) 0%, rgba(18, 21, 29, 0.92) 55%, #090b10 100%);
+    box-shadow:
+      inset 0 1.5px 2px rgba(255, 255, 255, 0.14),
+      inset 0 -3px 8px rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Outer socket frame with ribbed dark track (as seen in the bottom-right node diagram) */
+  .lumina-socket {
+    position: relative;
+    border-radius: 24px;
+    padding: 16px;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.025) 0px,
+        rgba(255, 255, 255, 0.025) 2px,
+        transparent 2px,
+        transparent 6px
+      ),
+      linear-gradient(180deg, rgba(20, 24, 34, 0.9) 0%, rgba(9, 11, 17, 0.96) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow:
+      0 24px 60px rgba(0, 0, 0, 0.8),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
+  /* ===================== BUTTONS ===================== */
+
+  .lumina-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #080b12;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 12px 20px;
+    line-height: 1;
+    box-shadow: 0 8px 24px -4px rgba(10, 25, 60, 0.45), inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .lumina-btn-primary:hover {
+    background-color: #f2f7ff;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px -4px rgba(10, 25, 60, 0.6);
+  }
+
+  .lumina-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+    background-color: #12151e;
+    color: #eef4ff;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 12px 20px;
+    line-height: 1;
+    box-shadow: 0 8px 24px -4px rgba(5, 12, 30, 0.5);
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .lumina-btn-secondary:hover {
+    background-color: #191e2b;
+    border-color: rgba(148, 195, 255, 0.35);
+    transform: translateY(-1px);
+  }
+
+  /* ===================== CARDS & PANELS (DARK ARCHITECTURAL) ===================== */
+
+  .card-face {
+    position: relative;
+    background: linear-gradient(
+      165deg,
+      rgba(19, 24, 38, 0.88) 0%,
+      rgba(11, 14, 24, 0.94) 55%,
+      rgba(8, 10, 17, 0.98) 100%
+    );
+    color: hsl(var(--deck-ink));
+    border-radius: var(--radius);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(16px);
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card-face:hover {
+    border-color: rgba(130, 180, 255, 0.24);
+  }
+
+  .card-back {
+    position: relative;
+    background-color: #0a0e18;
+    background-image: radial-gradient(rgba(120, 170, 255, 0.18) 1px, transparent 1px);
+    background-size: 14px 14px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  .card-index {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    opacity: 0.45;
+    z-index: 2;
+  }
+
+  .card-index--br {
+    transform: rotate(180deg);
+  }
+
+  .card-suit-red {
+    color: hsl(var(--deck-red-bright));
+  }
+
+  .card-suit-black {
+    color: hsl(var(--deck-ink));
+  }
+
+  /* ===================== TYPOGRAPHY & CONTROLS ===================== */
+
+  .deck-eyebrow {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .deck-subhead {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .deck-readout {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  .deck-link {
+    color: hsl(var(--deck-red-bright));
+    transition: color 0.2s ease;
+  }
+
+  .deck-link:hover {
+    color: #ffffff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .deck-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    line-height: 1;
+    padding: 12px 20px;
+    letter-spacing: 0.06em;
+    transition: all 0.2s ease;
+  }
+
+  .deck-btn--primary {
+    background-color: #ffffff;
+    color: #070a12;
+    box-shadow: 0 8px 24px -6px rgba(96, 165, 250, 0.45);
+  }
+
+  .deck-btn--primary:hover {
+    background-color: #eaf3ff;
+    transform: translateY(-1px);
+  }
+
+  .deck-btn--ghost {
+    background-color: rgba(17, 21, 32, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #f0f4fa;
+  }
+
+  .deck-btn--ghost:hover {
+    border-color: rgba(135, 185, 255, 0.4);
+    background-color: rgba(26, 33, 50, 0.95);
+  }
+
+  .deck-rule {
+    height: 1px;
+    background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.12) 20%,
+      rgba(130, 185, 255, 0.32) 50%,
+      rgba(255, 255, 255, 0.12) 80%,
+      rgba(255, 255, 255, 0.03)
+    );
+  }
+
+  /* Focus ring */
+  :where(a, button, [role="button"], input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--deck-red-bright));
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  .skip-link {
+    position: fixed;
+    left: 50%;
+    top: 0;
+    z-index: 10001;
+    transform: translate(-50%, -140%);
+    border-radius: 0 0 10px 10px;
+    background-color: #ffffff;
+    padding: 10px 20px;
+    font-family: var(--font-mono), monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #06080f;
+    transition: transform 0.2s ease;
+  }
+
+  .skip-link:focus {
+    transform: translate(-50%, 0);
+  }
+
+  .touch-target {
+    position: relative;
+  }
+
+  .touch-target::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+  }
+
+  .glass-card {
+    background-color: rgba(14, 18, 30, 0.75);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+  }
 }
 
-.text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500;
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .measure-deck {
+    max-width: 46rem;
+  }
+
+  .card-ratio {
+    aspect-ratio: 5 / 7;
+  }
 }
 
-/* Spotify Gradient */
-.text-spotify-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-500;
+html[data-deck-locked] {
+  overflow: hidden;
 }
 
-/* Music Wave Animation */
-@keyframes music-wave {
-
-  0%,
+@keyframes signal-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70%,
   100% {
-    height: 4px;
-  }
-
-  50% {
-    height: 16px;
+    transform: scale(2.4);
+    opacity: 0;
   }
 }
 
-.music-wave {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 20px;
+.signal-ping {
+  animation: signal-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-.music-wave span {
-  width: 3px;
-  background: linear-gradient(to top, #22c55e, #4ade80);
-  border-radius: 2px;
-  animation: music-wave 0.8s ease-in-out infinite;
-}
-
-.music-wave span:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.music-wave span:nth-child(2) {
-  animation-delay: 0.1s;
-}
-
-.music-wave span:nth-child(3) {
-  animation-delay: 0.2s;
-}
-
-.music-wave span:nth-child(4) {
-  animation-delay: 0.3s;
-}
-
-.music-wave span:nth-child(5) {
-  animation-delay: 0.4s;
-}
-
-/* Spotify Glow */
-.spotify-glow {
-  box-shadow: 0 0 30px rgba(34, 197, 94, 0.3), 0 0 60px rgba(34, 197, 94, 0.1);
-}
-
-/* Hover Glow Effect */
-.hover-glow {
-  transition: box-shadow 0.3s ease-in-out;
-}
-
-.hover-glow:hover {
-  box-shadow: 0 0 40px rgba(34, 197, 94, 0.4), 0 0 80px rgba(34, 197, 94, 0.2);
-}
-
-/* Track Rank Gradient */
-.rank-gradient {
-  background: linear-gradient(135deg, #22c55e 0%, #059669 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

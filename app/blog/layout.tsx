@@ -19,9 +19,5 @@ export default function BlogLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <section className="w-full">
-      {children}
-    </section>
-  );
+  return <div className="w-full">{children}</div>;
 }
