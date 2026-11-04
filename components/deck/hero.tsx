@@ -495,7 +495,7 @@ export function Hero() {
         {/* Screen-reader quick links */}
         <p className="sr-only">
           Fahreza Pasha Haikal (FPHaikal) — IT Support Specialist &amp; Full-Stack Developer.{" "}
-          <Link href="/blog">Read the notes</Link> — <Link href="/spotify">What is playing</Link>
+          <Link href="/blog">Read the notes</Link> — <Link href="/music">What is playing</Link>
         </p>
       </section>
 

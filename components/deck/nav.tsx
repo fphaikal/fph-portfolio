@@ -16,7 +16,7 @@ const CENTER_LINKS = [
   { id: "work", label: "PROJECTS", href: "/#work" },
   { id: "stack", label: "TOOLKIT", href: "/#stack" },
   { id: "notes", label: "NOTES", href: "/blog" },
-  { id: "music", label: "MUSIC", href: "/spotify" },
+  { id: "music", label: "MUSIC", href: "/music" },
 ];
 
 function isActive(pathname: string, href: string) {

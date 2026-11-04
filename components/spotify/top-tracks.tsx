@@ -45,18 +45,38 @@ export default function SpotifyTopTracks() {
     const fetchData = async () => {
       try {
         const response = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/top-tracks`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+            setTracks(data.data);
+            setLoading(false);
+            return;
+          }
         }
-        const data = await response.json();
-        setTracks(data.data);
+        // Fallback: If Spotify top-tracks returns non-200 or empty, fetch from spotify-history DB
+        const dbRes = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/recently-played-db?limit=10`);
+        if (dbRes.ok) {
+          const dbData = await dbRes.json();
+          const dbList = dbData?.data?.data || [];
+          if (Array.isArray(dbList) && dbList.length > 0) {
+            setTracks(dbList.map((item: any) => ({
+              name: item.name,
+              artists: item.artists,
+              album: item.album,
+              albumImageUrl: item.albumImageUrl || '/placeholder-album.png',
+              url: item.url || '',
+            })));
+            setLoading(false);
+            return;
+          }
+        }
+        setTracks([]);
         setLoading(false);
       } catch {
         setError(true);
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 

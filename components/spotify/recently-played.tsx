@@ -58,19 +58,62 @@ export default function SpotifyRecentlyPlayed() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/recently-played?limit=9`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch');
+        let list: Track[] = [];
+
+        // 1. Fetch from activity history first
+        try {
+          const actRes = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/activity/history?limit=9`);
+          if (actRes.ok) {
+            const actData = await actRes.json();
+            if (actData.success && Array.isArray(actData.data) && actData.data.length > 0) {
+              list = actData.data.map((item: any) => ({
+                name: item.title,
+                artists: item.subtitle || 'Unknown Artist',
+                album: item.details?.album || item.source || '',
+                albumImageUrl: item.details?.album_art_url || '/placeholder-album.png',
+                url: item.url || '',
+                playedAt: item.started_at,
+                duration_ms: item.details?.duration_ms,
+              }));
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to fetch activity history:", e);
         }
-        const data = await response.json();
-        setTracks(data.data || []);
+
+        // 2. Supplement or fallback to spotify DB history if fewer than 9
+        if (list.length < 9) {
+          try {
+            const needed = 9 - list.length;
+            const dbRes = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/recently-played-db?limit=${needed}`);
+            if (dbRes.ok) {
+              const dbData = await dbRes.json();
+              const dbTracks = dbData?.data?.data || [];
+              if (Array.isArray(dbTracks)) {
+                const mappedDb: Track[] = dbTracks.map((item: any) => ({
+                  name: item.name,
+                  artists: item.artists,
+                  album: item.album,
+                  albumImageUrl: item.albumImageUrl || '/placeholder-album.png',
+                  url: item.url || '',
+                  playedAt: item.created_at,
+                  duration_ms: item.duration_ms,
+                }));
+                list = [...list, ...mappedDb];
+              }
+            }
+          } catch (e) {
+            console.warn("Failed to fetch spotify DB history:", e);
+          }
+        }
+
+        setTracks(list);
         setLoading(false);
       } catch {
         setError(true);
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 

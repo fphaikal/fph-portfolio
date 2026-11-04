@@ -126,31 +126,63 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchNowPlaying = async () => {
     try {
-      const response = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/now-playing`);
-      const data = await response.json();
+      let activeTrack: Track | null = null;
 
-      // Check if song is currently playing
-      if (data.success && data.data) {
-        const result: Track = data.data;
+      // 1. Primary: Activity API (Windows, YouTube, Nocan, browser)
+      try {
+        const actRes = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/activity/now-playing`);
+        if (actRes.ok) {
+          const actData = await actRes.json();
+          if (actData.success && actData.data && actData.data.is_playing && actData.data.title) {
+            const item = actData.data;
+            activeTrack = {
+              name: item.title,
+              artists: item.artist || 'Unknown Artist',
+              album: item.album || '',
+              albumImageUrl: item.album_art_url || '/placeholder-album.png',
+              progress_ms: item.position_ms ?? 0,
+              duration_ms: item.duration_ms ?? 0,
+              url: item.url || '',
+              is_playing: true,
+            };
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch activity now playing:", err);
+      }
 
-        // If track changed, move current track to recent
-        if (previousTrackRef.current && previousTrackRef.current.name !== result.name) {
+      // 2. Secondary fallback: Spotify API
+      if (!activeTrack) {
+        try {
+          const spRes = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/now-playing`);
+          if (spRes.ok) {
+            const spData = await spRes.json();
+            if (spData.success && spData.data && spData.data.is_playing) {
+              activeTrack = spData.data;
+            }
+          }
+        } catch {
+          // ignore spotify fallback error
+        }
+      }
+
+      if (activeTrack) {
+        // If track changed, move previous track to recent
+        if (previousTrackRef.current && previousTrackRef.current.name !== activeTrack.name) {
           setRecentTrack(previousTrackRef.current);
         }
 
-        // Update previous track reference
-        previousTrackRef.current = result;
+        previousTrackRef.current = activeTrack;
+        setTrack(activeTrack);
+        setProgress(activeTrack.progress_ms || 0);
+        setIsPlaying(true);
+        setError(false);
 
-        setTrack(result);
-        setProgress(result.progress_ms || 0);
-        setIsPlaying(result.is_playing || false);
-
-        // Extract colors if playing
-        if (result.is_playing && result.albumImageUrl) {
-          await extractColors(result.albumImageUrl);
+        if (activeTrack.albumImageUrl && activeTrack.albumImageUrl !== '/placeholder-album.png') {
+          await extractColors(activeTrack.albumImageUrl);
         }
       } else {
-        // No song playing - move current track to recent if exists
+        // No song playing
         if (previousTrackRef.current) {
           setRecentTrack(previousTrackRef.current);
         }
@@ -158,15 +190,13 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
         setTrack(null);
         setIsPlaying(false);
         setProgress(0);
-        // Reset colors when not playing
         setDominantColor(null);
         setColorPalette([]);
+        setError(false);
       }
 
-      // Always set loading to false after first fetch
       setLoading(false);
       initialLoadDone.current = true;
-
     } catch (err) {
       console.error("Failed to fetch now playing:", err);
       setError(true);
@@ -175,26 +205,44 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const fetchRecentTrack = async () => {
-    // Only fetch from API if we don't have a recent track yet
     if (recentTrack) return;
 
     try {
-      const response = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/recently-played-db?limit=1&offset=1`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch');
-      }
-      const responseData = await response.json();
+      // 1. Try activity history first
+      try {
+        const actRes = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/activity/history?limit=1`);
+        if (actRes.ok) {
+          const actData = await actRes.json();
+          if (actData.success && Array.isArray(actData.data) && actData.data.length > 0) {
+            const item = actData.data[0];
+            setRecentTrack({
+              name: item.title,
+              artists: item.subtitle || 'Unknown Artist',
+              album: item.details?.album || item.source || '',
+              albumImageUrl: item.details?.album_art_url || '/placeholder-album.png',
+              progress_ms: 0,
+              duration_ms: item.details?.duration_ms || 0,
+              url: item.url || '',
+              is_playing: false,
+            });
+            return;
+          }
+        }
+      } catch {}
 
-      // Handle new API format: { data: { data: [...], pagination: {...} } }
-      if (responseData.success && responseData.data?.data && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
-        const result: Track = responseData.data.data[0]; // Get the first track from nested array
-        setRecentTrack(result);
+      // 2. Fallback to spotify history DB
+      const response = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/recently-played-db?limit=1&offset=0`);
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData.success && responseData.data?.data && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
+          const result: Track = responseData.data.data[0];
+          setRecentTrack(result);
+        }
       }
     } catch (err) {
       console.error("Failed to fetch recent track:", err);
     }
   };
-
   useEffect(() => {
     // Initial fetch
     fetchNowPlaying();
