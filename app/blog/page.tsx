@@ -1,5 +1,6 @@
 import { PostCard, type Post } from "@/components/blog/post-card";
 import { Card } from "@/components/deck/card";
+import { getApiBaseUrl } from "@/lib/utils";
 
 async function getPosts(): Promise<Post[]> {
   let apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:2026";

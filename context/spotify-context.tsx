@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useRef, useMemo } from 'react';
 import { FastAverageColor } from 'fast-average-color';
 import { Track } from '@/types';
+import { getApiBaseUrl } from '@/lib/utils';
 
 interface SpotifyContextType {
   track: Track | null;
@@ -130,7 +131,7 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
 
       // 1. Primary: Activity API (Windows, YouTube, Nocan, browser)
       try {
-        const actRes = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/activity/now-playing`);
+        const actRes = await fetch(`${getApiBaseUrl()}/api/activity/now-playing`);
         if (actRes.ok) {
           const actData = await actRes.json();
           if (actData.success && actData.data && actData.data.is_playing && actData.data.title) {
@@ -154,7 +155,7 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
       // 2. Secondary fallback: Spotify API
       if (!activeTrack) {
         try {
-          const spRes = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/now-playing`);
+          const spRes = await fetch(`${getApiBaseUrl()}/api/spotify/now-playing`);
           if (spRes.ok) {
             const spData = await spRes.json();
             if (spData.success && spData.data && spData.data.is_playing) {
@@ -210,7 +211,7 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
     try {
       // 1. Try activity history first
       try {
-        const actRes = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/activity/history?limit=1`);
+        const actRes = await fetch(`${getApiBaseUrl()}/api/activity/history?limit=1`);
         if (actRes.ok) {
           const actData = await actRes.json();
           if (actData.success && Array.isArray(actData.data) && actData.data.length > 0) {
@@ -231,7 +232,7 @@ export const SpotifyProvider = ({ children }: { children: ReactNode }) => {
       } catch {}
 
       // 2. Fallback to spotify history DB
-      const response = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/recently-played-db?limit=1&offset=0`);
+      const response = await fetch(`${getApiBaseUrl()}/api/spotify/recently-played-db?limit=1&offset=0`);
       if (response.ok) {
         const responseData = await response.json();
         if (responseData.success && responseData.data?.data && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {

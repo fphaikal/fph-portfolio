@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { Card } from "@/components/deck/card";
+import { getApiBaseUrl } from "@/lib/utils";
 
 interface Track {
   name: string;
@@ -62,7 +63,7 @@ export default function SpotifyRecentlyPlayed() {
 
         // 1. Fetch from activity history first
         try {
-          const actRes = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/activity/history?limit=9`);
+          const actRes = await fetch(`${getApiBaseUrl()}/api/activity/history?limit=9`);
           if (actRes.ok) {
             const actData = await actRes.json();
             if (actData.success && Array.isArray(actData.data) && actData.data.length > 0) {
@@ -85,7 +86,7 @@ export default function SpotifyRecentlyPlayed() {
         if (list.length < 9) {
           try {
             const needed = 9 - list.length;
-            const dbRes = await fetch(`https://${process.env.NEXT_PUBLIC_API_URL}/api/spotify/recently-played-db?limit=${needed}`);
+            const dbRes = await fetch(`${getApiBaseUrl()}/api/spotify/recently-played-db?limit=${needed}`);
             if (dbRes.ok) {
               const dbData = await dbRes.json();
               const dbTracks = dbData?.data?.data || [];

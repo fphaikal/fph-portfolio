@@ -1,5 +1,7 @@
 "use client";
 
+import { getApiBaseUrl } from '@/lib/utils';
+
 import { useEffect, useRef } from "react";
 
 interface ViewTrackerProps {
