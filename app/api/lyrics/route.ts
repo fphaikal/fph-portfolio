@@ -11,6 +11,26 @@ interface LRCLibResponse {
   syncedLyrics?: string;
 }
 
+const LRCLIB_HEADERS = {
+  'User-Agent': 'fph-portfolio/1.0.0 (https://fph.my.id)',
+};
+
+function cleanTrackQuery(track: string): string {
+  return track
+    .replace(/\s*\((?:feat\.?|ft\.?|with|remaster(?:ed)?|live|version)[^)]*\)/gi, '')
+    .replace(/\s*\[(?:feat\.?|ft\.?|with|remaster(?:ed)?|live|version)[^\]]*\]/gi, '')
+    .replace(/\s*-\s*(?:remaster(?:ed)?(?:\s+\d{4})?|single\s+version|radio\s+edit).*$/i, '')
+    .trim();
+}
+
+function formatPayload(item: LRCLibResponse) {
+  return {
+    syncedLyrics: item.syncedLyrics || null,
+    plainLyrics: item.plainLyrics || null,
+    instrumental: item.instrumental || false,
+  };
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const artist = searchParams.get('artist');
@@ -25,7 +45,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Build LRCLIB API URL
+    // 1. Primary exact match via /api/get
     const params = new URLSearchParams({
       artist_name: artist,
       track_name: track,
@@ -36,64 +56,93 @@ export async function GET(request: NextRequest) {
     }
 
     const response = await fetch(`https://lrclib.net/api/get?${params.toString()}`, {
-      headers: {
-        'User-Agent': 'fph-portfolio/1.0.0 (https://fph.my.id)',
-      },
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      headers: LRCLIB_HEADERS,
+      next: { revalidate: 3600 },
     });
 
-    if (!response.ok) {
-      // If not found, try searching without album
-      if (response.status === 404 && album) {
-        const fallbackParams = new URLSearchParams({
-          artist_name: artist,
-          track_name: track,
-        });
-
-        const fallbackResponse = await fetch(
-          `https://lrclib.net/api/get?${fallbackParams.toString()}`,
-          {
-            headers: {
-              'User-Agent': 'fph-portfolio/1.0.0 (https://fph.my.id)',
-            },
-            next: { revalidate: 3600 },
-          }
-        );
-
-        if (!fallbackResponse.ok) {
-          return NextResponse.json(
-            { success: false, error: 'Lyrics not found' },
-            { status: 404 }
-          );
-        }
-
-        const fallbackData: LRCLibResponse = await fallbackResponse.json();
+    if (response.ok) {
+      const data: LRCLibResponse = await response.json();
+      if (data.syncedLyrics || data.plainLyrics || data.instrumental) {
         return NextResponse.json({
           success: true,
-          data: {
-            syncedLyrics: fallbackData.syncedLyrics || null,
-            plainLyrics: fallbackData.plainLyrics || null,
-            instrumental: fallbackData.instrumental || false,
-          },
+          data: formatPayload(data),
+        });
+      }
+    }
+
+    // 2. Fallback: try /api/get without album if album was provided
+    if (album) {
+      const noAlbumParams = new URLSearchParams({
+        artist_name: artist,
+        track_name: track,
+      });
+
+      const fallbackResponse = await fetch(
+        `https://lrclib.net/api/get?${noAlbumParams.toString()}`,
+        {
+          headers: LRCLIB_HEADERS,
+          next: { revalidate: 3600 },
+        }
+      );
+
+      if (fallbackResponse.ok) {
+        const fallbackData: LRCLibResponse = await fallbackResponse.json();
+        if (fallbackData.syncedLyrics || fallbackData.plainLyrics || fallbackData.instrumental) {
+          return NextResponse.json({
+            success: true,
+            data: formatPayload(fallbackData),
+          });
+        }
+      }
+    }
+
+    // 3. Fallback: search via /api/search using primary artist and cleaned track name
+    const primaryArtist = artist.split(',')[0].trim();
+    const cleanedTrack = cleanTrackQuery(track) || track;
+
+    const searchQueries = [
+      new URLSearchParams({ track_name: track, artist_name: primaryArtist }),
+      ...(cleanedTrack !== track
+        ? [new URLSearchParams({ track_name: cleanedTrack, artist_name: primaryArtist })]
+        : []),
+      new URLSearchParams({ q: `${primaryArtist} ${cleanedTrack}` }),
+    ];
+
+    for (const searchQuery of searchQueries) {
+      const searchRes = await fetch(
+        `https://lrclib.net/api/search?${searchQuery.toString()}`,
+        {
+          headers: LRCLIB_HEADERS,
+          next: { revalidate: 3600 },
+        }
+      );
+
+      if (!searchRes.ok) continue;
+
+      const results: LRCLibResponse[] = await searchRes.json();
+      if (!Array.isArray(results) || results.length === 0) continue;
+
+      const syncedMatch = results.find((item) => Boolean(item.syncedLyrics));
+      if (syncedMatch) {
+        return NextResponse.json({
+          success: true,
+          data: formatPayload(syncedMatch),
         });
       }
 
-      return NextResponse.json(
-        { success: false, error: 'Lyrics not found' },
-        { status: 404 }
-      );
+      const plainMatch = results.find((item) => Boolean(item.plainLyrics) || item.instrumental);
+      if (plainMatch) {
+        return NextResponse.json({
+          success: true,
+          data: formatPayload(plainMatch),
+        });
+      }
     }
 
-    const data: LRCLibResponse = await response.json();
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        syncedLyrics: data.syncedLyrics || null,
-        plainLyrics: data.plainLyrics || null,
-        instrumental: data.instrumental || false,
-      },
-    });
+    return NextResponse.json(
+      { success: false, error: 'Lyrics not found' },
+      { status: 404 }
+    );
   } catch (error) {
     console.error('Error fetching lyrics:', error);
     return NextResponse.json(

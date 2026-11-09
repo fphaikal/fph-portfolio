@@ -33,7 +33,7 @@ export const NAV_MODULES: NavModule[] = [
     id: "music",
     index: "03",
     label: "Music",
-    href: "/spotify",
+    href: "/music",
     description: "Yang sedang saya dengar",
   },
 ];

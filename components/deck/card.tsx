@@ -46,7 +46,8 @@ export type SquircleIconVariant =
   | "github"
   | "mail"
   | "linkedin"
-  | "instagram";
+  | "instagram"
+  | "music";
 
 /**
  * Sculpted 3D White-to-Ice-Blue Icon System.
@@ -659,6 +660,36 @@ export function SquircleIcon({
             strokeWidth="2.3"
           />
           <circle cx="26" cy="14" fill="#0d121d" r="1.5" />
+        </>
+      )}
+
+      {variant === "music" && (
+        <>
+          {/* Vinyl / Audio Transducer Disc */}
+          <circle
+            cx="17.5"
+            cy="21.5"
+            fill={`url(#${mainGrad})`}
+            r="9.5"
+          />
+          <circle
+            cx="17.5"
+            cy="21.5"
+            fill="#0d121d"
+            r="3.2"
+          />
+          {/* Tonearm / Note Stem + Flag */}
+          <path
+            d="M24.5 21.5V9.5L32 11.8V16L24.5 13.8"
+            fill={`url(#${subGrad})`}
+          />
+          <path
+            d="M24.5 21.5V9.5L32 11.8"
+            stroke={`url(#${mainGrad})`}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2.4"
+          />
         </>
       )}
     </svg>

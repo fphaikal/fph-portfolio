@@ -6,12 +6,21 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { parseLRC, findCurrentLineIndex } from '@/lib/lrc-parser';
 import { cn } from '@/lib/utils';
 
+export type LyricsStatus =
+  | 'loading'
+  | 'synced'
+  | 'plain'
+  | 'instrumental'
+  | 'unavailable';
+
 interface SyncedLyricsProps {
   artist: string;
   track: string;
   album: string;
   progress: number;
   isPlaying: boolean;
+  variant?: 'inline' | 'modal';
+  onStatusChange?: (status: LyricsStatus) => void;
 }
 
 interface LyricsData {
@@ -28,47 +37,43 @@ function formatTimestamp(milliseconds: number): string {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-/** Neutral status message for states without lyrics. */
-function LyricsMessage({ children }: { children: string }) {
-  return (
-    <div className="flex items-center justify-center py-8">
-      <span className="deck-readout text-deck-sm font-medium text-deck-ink/60">
-        {children}
-      </span>
-    </div>
-  );
-}
-
 export default function SyncedLyrics({
   artist,
   track,
   album,
   progress,
+  isPlaying,
+  variant = 'inline',
+  onStatusChange,
 }: SyncedLyricsProps) {
   const [lyricsData, setLyricsData] = useState<LyricsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'synced' | 'full'>('synced');
 
-  // Hormati preferensi gerak minimal: tampilkan isi langsung, tanpa animasi.
   const reduceMotion = useReducedMotion();
-
-  // Cache untuk melacak lagu terakhir yang diambil — mencegah pengambilan ulang.
   const lastFetchedTrack = useRef<string | null>(null);
 
-  // Parse lyrics once when data changes
   const parsedLyrics = useMemo(() => {
     if (!lyricsData?.syncedLyrics) return [];
     return parseLRC(lyricsData.syncedLyrics);
   }, [lyricsData?.syncedLyrics]);
 
-  // Find current line based on progress
   const currentIndex = useMemo(() => {
     return findCurrentLineIndex(parsedLyrics, progress);
   }, [parsedLyrics, progress]);
 
-  // Get visible lyrics (previous, current, next)
   const visibleLyrics = useMemo(() => {
     if (parsedLyrics.length === 0) return [];
+
+    // Before first line starts (or when paused at 00:00), preview first 4 lines
+    if (currentIndex < 0) {
+      return parsedLyrics.slice(0, 4).map((item, idx) => ({
+        ...item,
+        index: idx,
+        position: idx === 0 && !isPlaying ? 0 : idx + 1,
+      }));
+    }
 
     const lines = [];
     for (let i = currentIndex - 1; i <= currentIndex + 2; i++) {
@@ -76,18 +81,16 @@ export default function SyncedLyrics({
         lines.push({
           ...parsedLyrics[i],
           index: i,
-          position: i - currentIndex, // -1, 0, 1, 2
+          position: i - currentIndex,
         });
       }
     }
     return lines;
-  }, [parsedLyrics, currentIndex]);
+  }, [parsedLyrics, currentIndex, isPlaying]);
 
-  // Fetch lyrics only when track actually changes
   useEffect(() => {
     const trackKey = `${artist}-${track}`;
 
-    // Skip if same track already fetched
     if (lastFetchedTrack.current === trackKey) {
       return;
     }
@@ -97,6 +100,7 @@ export default function SyncedLyrics({
 
       setLoading(true);
       setError(null);
+      onStatusChange?.('loading');
 
       try {
         const params = new URLSearchParams({
@@ -108,112 +112,258 @@ export default function SyncedLyrics({
         const response = await fetch(`/api/lyrics?${params.toString()}`);
         const data = await response.json();
 
-        if (data.success) {
-          setLyricsData(data.data);
+        if (data.success && data.data) {
+          const payload: LyricsData = data.data;
+          setLyricsData(payload);
           lastFetchedTrack.current = trackKey;
+
+          if (payload.instrumental) {
+            onStatusChange?.('instrumental');
+          } else if (payload.syncedLyrics) {
+            onStatusChange?.('synced');
+          } else if (payload.plainLyrics) {
+            onStatusChange?.('plain');
+          } else {
+            onStatusChange?.('unavailable');
+          }
         } else {
+          setLyricsData(null);
           setError(data.error || 'Lyrics not found');
+          onStatusChange?.('unavailable');
         }
       } catch {
+        setLyricsData(null);
         setError('Failed to fetch lyrics');
+        onStatusChange?.('unavailable');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchLyrics();
-  }, [artist, track, album]);
+    void fetchLyrics();
+  }, [artist, track, album, onStatusChange]);
+
+  const containerHeight = variant === 'modal' ? 'min-h-[280px]' : 'min-h-[240px]';
 
   if (loading) {
-    return <LyricsMessage>Loading lyrics…</LyricsMessage>;
+    return (
+      <div className={cn('flex flex-col items-center justify-center gap-3 py-10', containerHeight)}>
+        <div className="flex items-center gap-1.5" aria-hidden="true">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-sky-400" />
+          <span className="h-2 w-2 animate-pulse rounded-full bg-sky-400/70 [animation-delay:150ms]" />
+          <span className="h-2 w-2 animate-pulse rounded-full bg-sky-400/40 [animation-delay:300ms]" />
+        </div>
+        <p className="font-mono text-xs uppercase tracking-[0.1em] text-[#95a0b8]">
+          Loading lyrics from LRCLIB...
+        </p>
+      </div>
+    );
   }
 
   if (error || !lyricsData) {
-    return <LyricsMessage>{error || 'No lyrics available'}</LyricsMessage>;
+    return (
+      <div className={cn('flex flex-col items-center justify-center gap-2 py-10 text-center', containerHeight)}>
+        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-sky-300">
+          NO LYRICS RECORDED
+        </span>
+        <p className="max-w-[34ch] font-sans text-sm text-[#95a0b8]">
+          {error === 'Lyrics not found'
+            ? 'Lyrics are not available in the LRCLIB catalog for this track yet.'
+            : error || 'Lyrics are currently unavailable for this track.'}
+        </p>
+      </div>
+    );
   }
 
   if (lyricsData.instrumental) {
-    return <LyricsMessage>Instrumental</LyricsMessage>;
+    return (
+      <div className={cn('flex flex-col items-center justify-center gap-2 py-10 text-center', containerHeight)}>
+        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-sky-300">
+          INSTRUMENTAL TRACK
+        </span>
+        <p className="font-sans text-sm text-[#95a0b8]">
+          This composition is instrumental with no vocal transcript.
+        </p>
+      </div>
+    );
   }
 
-  // No synced lyrics, show plain lyrics (scrollable)
+  // Plain lyrics fallback (when synced LRC is not available)
   if (!lyricsData.syncedLyrics && lyricsData.plainLyrics) {
     const plainLines = lyricsData.plainLyrics.split('\n');
     return (
-      <div className="scrollbar-none h-[280px] overflow-y-auto">
-        <div className="flex flex-col gap-3 py-4">
-          {plainLines.map((line, index) => (
-            <p
-              key={index}
-              className="font-sans text-deck-base text-deck-ink/70"
-            >
-              {line || '\u00A0'}
-            </p>
-          ))}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+          <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#95a0b8]">
+            UNSYNCED TRANSCRIPT ({plainLines.filter(Boolean).length} LINES)
+          </span>
+        </div>
+        <div
+          className={cn(
+            ' overflow-y-auto pr-2',
+            variant === 'modal' ? 'max-h-[300px]' : 'max-h-[240px]'
+          )}
+          tabIndex={0}
+          role="region"
+          aria-label={`Lyrics for ${track}`}
+        >
+          <div className="flex flex-col gap-2.5 py-2">
+            {plainLines.map((line, index) => (
+              <p
+                key={index}
+                className="font-sans text-sm leading-relaxed text-[#d8e3f5] sm:text-base"
+              >
+                {line || '\u00A0'}
+              </p>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
-  // Synced lyrics — baris aktif memakai tinta merah kartu.
+  // Synced LRC lyrics (with toggle between Live Sync Focus and Full Scrollable Transcript)
   return (
-    <div className="flex h-[250px] flex-col justify-center gap-2 overflow-hidden">
-      {visibleLyrics.map((line) => {
-        const isCurrent = line.position === 0;
-        const isPast = line.position < 0;
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+        <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#95a0b8]">
+          {currentIndex < 0 && parsedLyrics.length > 0
+            ? isPlaying
+              ? `INTRO · VOCALS AT ${formatTimestamp(parsedLyrics[0].time)}`
+              : `LINE 01 / ${String(parsedLyrics.length).padStart(2, '0')}`
+            : `LINE ${String(currentIndex + 1).padStart(2, '0')} / ${String(parsedLyrics.length).padStart(2, '0')}`}
+        </span>
 
-        return (
-          <motion.div
-            key={line.index}
-            layout={!reduceMotion}
-            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-            animate={{
-              opacity: isCurrent ? 1 : isPast ? 0.35 : 0.45,
-              y: 0,
-            }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={
-              reduceMotion
-                ? { duration: 0 }
-                : {
-                    type: 'spring',
-                    stiffness: 200,
-                    damping: 25,
-                  }
-            }
+        <div className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-[#070a12] p-0.5">
+          <button
+            type="button"
+            onClick={() => setViewMode('synced')}
             className={cn(
-              'flex items-baseline gap-3 border-l-2 py-1 pl-4',
-              isCurrent ? 'border-deck-red' : 'border-transparent',
+              'min-h-[32px] rounded-md px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors',
+              viewMode === 'synced'
+                ? 'bg-white font-semibold text-[#06080f]'
+                : 'text-[#95a0b8] hover:text-white'
             )}
           >
-            <span className="deck-readout shrink-0 text-deck-xs text-deck-ink/50">
-              {formatTimestamp(line.time)}
-            </span>
-            <span
-              className={cn(
-                'font-sans text-deck-base',
-                isCurrent
-                  ? 'font-semibold text-deck-red'
-                  : 'text-deck-ink/60',
-              )}
-            >
-              {line.text}
-            </span>
-          </motion.div>
-        );
-      })}
+            LIVE SYNC
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('full')}
+            className={cn(
+              'min-h-[32px] rounded-md px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors',
+              viewMode === 'full'
+                ? 'bg-white font-semibold text-[#06080f]'
+                : 'text-[#95a0b8] hover:text-white'
+            )}
+          >
+            ALL ({parsedLyrics.length})
+          </button>
+        </div>
+      </div>
 
-      {/* Line not started yet */}
-      {currentIndex < 0 && parsedLyrics.length > 0 && (
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 0.6 }}
-          className="border-l-2 border-transparent pl-4"
+      {viewMode === 'full' ? (
+        <div
+          className={cn(
+            'overflow-y-auto pr-2',
+            variant === 'modal' ? 'max-h-[300px]' : 'max-h-[240px]'
+          )}
+          tabIndex={0}
+          role="region"
+          aria-label={`Full timestamped lyrics for ${track}`}
         >
-          <span className="text-deck-sm font-medium text-deck-ink/60">
-            Waiting for the first line…
-          </span>
-        </motion.div>
+          <div className="flex flex-col gap-2 py-1">
+            {parsedLyrics.map((line, index) => {
+              const isCurrent = index === currentIndex;
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    'flex items-baseline gap-3 rounded-lg border-l-2 px-3 py-1.5 transition-colors',
+                    isCurrent
+                      ? 'border-sky-400 bg-sky-400/10'
+                      : 'border-transparent'
+                  )}
+                >
+                  <span className="deck-readout shrink-0 text-xs text-[#95a0b8]">
+                    {formatTimestamp(line.time)}
+                  </span>
+                  <span
+                    className={cn(
+                      'font-sans text-sm leading-relaxed sm:text-base',
+                      isCurrent ? 'font-semibold text-white' : 'text-[#c2cee3]'
+                    )}
+                  >
+                    {line.text}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div
+          className={cn(
+            'flex flex-col justify-center gap-2.5 overflow-hidden py-2',
+            variant === 'modal' ? 'min-h-[260px]' : 'min-h-[220px]'
+          )}
+          aria-live="polite"
+        >
+          {visibleLyrics.map((line) => {
+            const isCurrent = line.position === 0;
+            const isPast = line.position < 0;
+
+            return (
+              <motion.div
+                key={line.index}
+                layout={!reduceMotion}
+                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                animate={{
+                  opacity: isCurrent ? 1 : isPast ? 0.65 : 0.75,
+                  scale: isCurrent ? 1 : 0.98,
+                  y: 0,
+                }}
+                exit={{ opacity: 0, y: -14 }}
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : {
+                        type: 'spring',
+                        stiffness: 210,
+                        damping: 26,
+                      }
+                }
+                className={cn(
+                  'flex items-baseline gap-3.5 rounded-r-xl border-l-2 py-2 pl-4 pr-3 transition-colors',
+                  isCurrent
+                    ? 'border-sky-400 bg-sky-400/[0.08]'
+                    : 'border-white/10'
+                )}
+              >
+                <span
+                  className={cn(
+                    'deck-readout shrink-0 text-xs',
+                    isCurrent ? 'font-medium text-sky-300' : 'text-[#95a0b8]'
+                  )}
+                >
+                  {formatTimestamp(line.time)}
+                </span>
+                <span
+                  className={cn(
+                    'font-sans leading-snug',
+                    isCurrent
+                      ? variant === 'modal'
+                        ? 'text-xl font-semibold text-white sm:text-2xl'
+                        : 'text-lg font-semibold text-white sm:text-xl'
+                      : 'text-sm font-normal text-[#95a0b8] sm:text-base'
+                  )}
+                >
+                  {line.text}
+                </span>
+              </motion.div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
